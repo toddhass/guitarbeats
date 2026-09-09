@@ -20,6 +20,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .brand { font-size: 1.05rem; font-weight: 600; letter-spacing: -.02em; }
 .brand small { display: block; color: var(--muted); font-size: .85rem; font-weight: 400; }
 .badge { border-radius: 999px; padding: .3rem .8rem; font-size: .85rem; font-weight: 600; background: var(--secondary); color: var(--fg); box-shadow: var(--border); border: 0; }
+.badge.on { background: var(--primary); color: var(--primary-fg); }
 .card { background: var(--card); border-radius: 1rem; padding: 1rem; box-shadow: var(--border); min-width: 0; }
 .kicker { margin: 0 0 .5rem; font-size: .85rem; color: var(--muted); font-weight: 600; }
 .hint { color: var(--muted); font-size: .9rem; margin: 0 0 .75rem; line-height: 1.4; }
@@ -53,11 +54,13 @@ input[type=search] { width: 100%; height: 3rem; border: 1px solid var(--line); b
 .chip { min-height: 2.6rem; border: 1px solid var(--line); border-radius: 999px; background: var(--secondary); color: var(--fg); font: 600 .9rem Figtree, sans-serif; padding: 0 .95rem; }
 .chip.on { background: var(--primary); color: var(--primary-fg); border-color: transparent; }
 .foot { text-align: center; color: var(--muted); font-size: .85rem; }
-.empty { padding: 1.5rem .75rem; text-align: center; color: var(--muted); }
+.empty { padding: .75rem .75rem; text-align: center; color: var(--muted); }
 .player { display: flex; flex-direction: column; gap: .75rem; }
 .library, .rail-groove { display: none; flex-direction: column; gap: .75rem; }
-body.pane-songs .library { display: flex; }
-body.pane-track .rail-groove { display: flex; }
+body.pane-songs .library,
+.wrap.pane-songs .library { display: flex; }
+body.pane-track .rail-groove,
+.wrap.pane-track .rail-groove { display: flex; }
 .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; display: grid; grid-template-columns: 1fr 1fr; gap: .25rem; padding: .5rem 1rem max(.75rem, env(safe-area-inset-bottom)); background: rgb(17 16 14 / .94); }
 .tabs button { min-height: 2.7rem; border: 0; border-radius: .5rem; background: transparent; color: var(--fg); font: 600 .95rem Figtree, sans-serif; }
 .tabs button.on { background: var(--card); }
