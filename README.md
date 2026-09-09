@@ -1,2 +1,3 @@
-# guitarbeats
-GuitarBeats — browser drum machine for guitarists
+# GuitarBeats
+
+Browser drum machine for guitarists. Search a song, tap Start, play along.
