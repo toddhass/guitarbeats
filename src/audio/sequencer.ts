@@ -15,6 +15,8 @@ export class Sequencer {
   filling = false;
   private fillLeft = 0;
   crashQueued = false;
+  loopPart = false;
+  countInLeft = 0;
   onNext?: (step: number, part: SongPart) => void;
 
   constructor(synth: Synth, ctx: AudioContext) {
@@ -40,6 +42,10 @@ export class Sequencer {
     return 60 / Math.max(40, this.bpm) / 4;
   }
 
+  private click(time: number, downbeat: boolean) {
+    this.synth.trig(downbeat ? "rim" : "hat", time, downbeat ? 1 : 0.45);
+  }
+
   private scheduleStep(i: number, time: number, part: SongPart, useFill: boolean) {
     const pattern: Partial<Pattern> = useFill && part.fill ? part.fill : part.groove;
     for (const voice of Object.keys(pattern)) {
@@ -53,22 +59,29 @@ export class Sequencer {
   }
 
   private advance() {
+    const time = this.nextStepTime + (this.step % 2 === 1 && this.currentPart ? this.currentPart.swing * this.stepDuration() : 0);
+
+    if (this.countInLeft > 0) {
+      if (this.step % 4 === 0) this.click(time, this.step === 0);
+      this.onNext?.(this.step, this.currentPart ?? { id: "count", name: "Count-in", bars: 1, swing: 0, groove: {}, fill: {} });
+      this.countInLeft--;
+      this.nextStepTime += this.stepDuration();
+      this.step++;
+      if (this.step >= 16) this.step = 0;
+      return;
+    }
+
     const part = this.currentPart;
     if (!part) {
       this.nextStepTime += this.stepDuration();
       return;
     }
-    const swing = this.step % 2 === 1 ? part.swing * this.stepDuration() : 0;
-    const time = this.nextStepTime + swing;
-    const useFill = this.filling;
-    this.scheduleStep(this.step, time, part, useFill);
+    this.scheduleStep(this.step, time, part, this.filling);
     this.onNext?.(this.step, part);
-
     if (this.filling) {
       this.fillLeft--;
       if (this.fillLeft <= 0) this.filling = false;
     }
-
     this.nextStepTime += this.stepDuration();
     this.step++;
     if (this.step >= 16) {
@@ -76,7 +89,7 @@ export class Sequencer {
       this.barsPlayed++;
       if (this.barsPlayed >= Math.max(1, part.bars)) {
         this.barsPlayed = 0;
-        if (this.parts.length) this.partIndex = (this.partIndex + 1) % this.parts.length;
+        if (!this.loopPart && this.parts.length) this.partIndex = (this.partIndex + 1) % this.parts.length;
       }
     }
   }
