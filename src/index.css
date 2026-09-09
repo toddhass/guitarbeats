@@ -61,13 +61,12 @@ input[type=search] { width: 100%; height: 3rem; border: 1px solid var(--line); b
 .fretboard { border: 1px solid var(--line); border-radius: .5rem; overflow: hidden; background: #141311; }
 .nut, .fret-row { display: grid; grid-template-columns: repeat(6, 1fr); }
 .fret-row { border-top: 1px solid var(--line); }
-.open, .cell { height: 2rem; display: flex; align-items: center; justify-content: center; font-size: .8rem; color: var(--muted); }
-.cell.dot { color: var(--primary-fg); font-weight: 700; }
-.cell.dot::before { content: ""; width: 1.45rem; height: 1.45rem; border-radius: 999px; background: var(--primary); position: absolute; z-index: 0; }
-.cell { position: relative; }
-.cell.dot { z-index: 1; }
-.cell.dot { color: var(--primary-fg); }
+.open, .cell { height: 2.15rem; display: flex; align-items: center; justify-content: center; font-size: .8rem; color: var(--muted); position: relative; }
+.cell.dot::before { content: ""; width: 1.5rem; height: 1.5rem; border-radius: 999px; background: var(--primary); position: absolute; z-index: 0; }
+.cell b { position: relative; z-index: 1; color: var(--primary-fg); font-size: .85rem; }
 .labels .open { font-size: .7rem; }
+.strum { display: grid; grid-template-columns: repeat(4, 1fr); gap: .35rem; margin: 0 0 .25rem; }
+.strum span { text-align: center; padding: .45rem 0; border-radius: .4rem; background: var(--secondary); font-size: .8rem; font-weight: 600; }
 .foot { text-align: center; color: var(--muted); font-size: .85rem; }
 .empty { padding: .75rem .75rem; text-align: center; color: var(--muted); }
 .player { display: flex; flex-direction: column; gap: .75rem; }
