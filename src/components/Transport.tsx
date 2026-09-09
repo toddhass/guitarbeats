@@ -15,23 +15,26 @@ export function Transport() {
   const volume = useApp((s) => s.volume);
   const setVolume = useApp((s) => s.setVolume);
 
-  function tap(fn: () => void) {
-    return (e: React.PointerEvent) => {
-      e.preventDefault();
-      fn();
+  function press(fn: () => void) {
+    return {
+      onPointerDown: (e: React.PointerEvent) => {
+        if (e.pointerType === "mouse" && e.button !== 0) return;
+        fn();
+      },
+      onClick: () => fn(),
     };
   }
 
   return (
     <>
-      <button className={`start${playing ? " stop" : ""}`} type="button" onPointerDown={tap(toggleStart)}>
+      <button className={`start${playing ? " stop" : ""}`} type="button" {...press(toggleStart)}>
         {playing ? "Stop" : "Start"}
       </button>
       <div className="grid">
-        <button className="pedal fill" type="button" onPointerDown={tap(fill)}>Fill</button>
-        <button className="pedal next" type="button" onPointerDown={tap(nextPart)}>Next part</button>
-        <button className="pedal restart" type="button" onPointerDown={tap(restart)}>Restart</button>
-        <button className="pedal crash" type="button" onPointerDown={tap(crash)}>Crash</button>
+        <button className="pedal fill" type="button" {...press(fill)}>Fill</button>
+        <button className="pedal next" type="button" {...press(nextPart)}>Next part</button>
+        <button className="pedal restart" type="button" {...press(restart)}>Restart</button>
+        <button className="pedal crash" type="button" {...press(crash)}>Crash</button>
       </div>
       <section className="card transport-groove">
         <p className="label">Groove</p>
@@ -41,7 +44,7 @@ export function Transport() {
               key={s.id}
               type="button"
               className={`chip${song.feel === s.id ? " on" : ""}`}
-              onPointerDown={tap(() => selectFeel(s.id))}
+              {...press(() => selectFeel(s.id))}
             >
               {s.label}
             </button>
