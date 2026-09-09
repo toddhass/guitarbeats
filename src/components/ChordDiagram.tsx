@@ -21,7 +21,7 @@ export function ChordDiagram({ chord }: { chord: string }) {
               const here = f === fret + 1;
               return (
                 <span key={i} className={`cell${here ? " dot" : ""}`}>
-                  {here ? s.fingers[i] ?? "" : ""}
+                  {here ? <b>{s.fingers[i] ?? ""}</b> : null}
                 </span>
               );
             })}
@@ -32,7 +32,11 @@ export function ChordDiagram({ chord }: { chord: string }) {
         </div>
       </div>
       <p className="hint">{s.tip}</p>
-      <p className="hint">Right hand: down on 1 and 3, up on the ands. Follow the hat.</p>
+      <p className="label">Right hand</p>
+      <div className="strum">
+        <span>1 ↓</span><span>&amp; ↑</span><span>2 ↓</span><span>&amp; ↑</span>
+        <span>3 ↓</span><span>&amp; ↑</span><span>4 ↓</span><span>&amp; ↑</span>
+      </div>
     </div>
   );
 }
