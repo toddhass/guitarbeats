@@ -37,8 +37,31 @@ function getEngine(): Engine {
 
 function ensureParts(song: Song) {
   const { seq } = getEngine();
-  if (seq.parts !== song.parts) seq.setParts(song.parts);
+  seq.setParts(song.parts, true);
+  seq.bpm = song.bpm;
   return seq;
+}
+
+function beginPlayback(song: Song, set: (p: object) => void) {
+  const { ctx, seq, synth } = getEngine();
+  unlockAudio(ctx);
+  seq.stop();
+  seq.setParts(song.parts, true);
+  seq.bpm = song.bpm;
+  seq.onNext = (step, part) => set({ step, partName: part.name });
+  seq.start();
+  try {
+    synth.trig("kick", ctx.currentTime + 0.02, 1);
+    synth.trig("hat", ctx.currentTime + 0.02, 0.8);
+  } catch { /* */ }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  set({
+    song,
+    bpm: song.bpm,
+    playing: true,
+    step: 0,
+    partName: song.parts[0]?.name ?? "Intro",
+  });
 }
 
 export const useApp = create<{
@@ -114,12 +137,7 @@ export const useApp = create<{
       get().library.find((s) => s.id === id) ||
       (SEEDS.find((s) => s.id === id) ? makeSong(SEEDS.find((s) => s.id === id)!) : null);
     if (!song) return;
-    const { ctx } = getEngine();
-    unlockAudio(ctx);
-    const seq = ensureParts(song);
-    seq.setParts(song.parts, true);
-    seq.bpm = song.bpm;
-    set({ song, bpm: song.bpm, partName: song.parts[0]?.name ?? "Intro" });
+    beginPlayback(song, set);
   },
 
   selectFeel: (feel) => {
@@ -131,12 +149,14 @@ export const useApp = create<{
       bpm: get().bpm,
       feel,
     });
-    const { ctx } = getEngine();
+    const { ctx, seq } = getEngine();
     unlockAudio(ctx);
-    const seq = getEngine().seq;
     seq.setParts(song.parts, true);
     seq.bpm = get().bpm;
     set({ song, partName: song.parts[0]?.name ?? "Intro" });
+    if (get().playing) {
+      seq.onNext = (step, part) => set({ step, partName: part.name });
+    }
   },
 
   setBpm: (bpm) => {
@@ -155,23 +175,14 @@ export const useApp = create<{
     const now = Date.now();
     if (now - lastToggle < 280) return;
     lastToggle = now;
-    const { ctx, seq, synth } = getEngine();
+    const { ctx, seq } = getEngine();
     unlockAudio(ctx);
     if (get().playing) {
       seq.stop();
       set({ playing: false });
       return;
     }
-    seq.bpm = get().bpm;
-    if (seq.parts !== get().song.parts) seq.setParts(get().song.parts, false);
-    if (!seq.parts.length) seq.setParts(get().song.parts, true);
-    seq.onNext = (step, part) => set({ step, partName: part.name });
-    seq.start();
-    try {
-      synth.trig("kick", ctx.currentTime + 0.02, 1);
-      synth.trig("hat", ctx.currentTime + 0.02, 0.8);
-    } catch { /* */ }
-    set({ playing: true, partName: seq.currentPart?.name ?? get().song.parts[0]?.name ?? "Intro" });
+    beginPlayback(get().song, set);
   },
 
   fill: () => {

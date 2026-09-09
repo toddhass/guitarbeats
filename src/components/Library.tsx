@@ -27,7 +27,7 @@ export function Library() {
             key={s.id}
             type="button"
             className={`row${song.id === s.id ? " active" : ""}`}
-            onPointerDown={(e) => { e.preventDefault(); selectSong(s.id); }}
+            onClick={() => selectSong(s.id)}
           >
             <span>
               <span className="t">{s.title}</span>
