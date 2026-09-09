@@ -1,5 +1,6 @@
 import { useApp } from "../state/store";
 import { chordsFor } from "../data/chords";
+import { ChordDiagram } from "./ChordDiagram";
 
 export function PracticePanel() {
   const song = useApp((s) => s.song);
@@ -16,7 +17,6 @@ export function PracticePanel() {
   return (
     <section className="card practice">
       <p className="kicker">Practice</p>
-      <p className="hint">Off by default. Turn on what you need. Revert commit to remove this panel.</p>
       <div className="chips">
         <button type="button" className={`chip${countIn ? " on" : ""}`} onClick={() => setCountIn(!countIn)}>Count-in</button>
         <button type="button" className={`chip${loopPart ? " on" : ""}`} onClick={() => setLoopPart(!loopPart)}>Loop part</button>
@@ -24,12 +24,13 @@ export function PracticePanel() {
         <button type="button" className={`chip${speed === 0.7 ? " on" : ""}`} onClick={() => setSpeed(0.7)}>Slow</button>
         <button type="button" className={`chip${speed === 1 ? " on" : ""}`} onClick={() => setSpeed(1)}>Full</button>
       </div>
-      <p className="label" style={{ marginTop: "0.85rem" }}>Chords</p>
+      <p className="label" style={{ marginTop: "0.85rem" }}>Left hand</p>
       <div className="chords">
         {chords.map((c, i) => (
-          <span key={c + i} className={`chord${i === active ? " on" : ""}`}>{c}</span>
+          <button key={c + i} type="button" className={`chord${i === active ? " on" : ""}`}>{c}</button>
         ))}
       </div>
+      <ChordDiagram chord={chords[active] ?? "G"} />
     </section>
   );
 }
