@@ -78,6 +78,8 @@ export const useApp = create<{
   nextPart: () => void;
   restart: () => void;
   crash: () => void;
+  holdPause: () => void;
+  holdResume: () => void;
 }>((set, get) => {
   function applyKitClick() {
     const { synth, seq } = getEngine();
@@ -271,6 +273,22 @@ export const useApp = create<{
       unlockAudio(ctx);
       try { synth.trig("crash", ctx.currentTime, 1); } catch { /* */ }
       seq.queueCrash();
+    },
+
+    holdPause: () => {
+      const { seq, ctx } = getEngine();
+      unlockAudio(ctx);
+      seq.stop();
+      set({ playing: false });
+    },
+
+    holdResume: () => {
+      const { seq, ctx } = getEngine();
+      unlockAudio(ctx);
+      applyKitClick();
+      seq.onNext = (step, part) => set({ step, partName: part.name });
+      if (!seq.playing) seq.start();
+      set({ playing: true });
     },
   };
 });
