@@ -19,8 +19,9 @@ button { font-family: inherit; }
 .wrap { width: 100%; max-width: 28rem; margin: 0 auto; padding: 1rem 1rem 5.5rem; display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
 @media (min-width: 768px) {
   .wrap { max-width: 46rem; padding: 1.5rem 1.5rem 6rem; }
-  .pane-practice { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+  .pane-practice { display: grid; grid-template-columns: 1fr; gap: 1rem; align-items: start; }
   .wrap.pane-practice .pane-practice { display: grid; }
+  .wrap.pane-groove .pane-groove { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
   .list { max-height: 28rem; }
 }
 header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
@@ -91,8 +92,9 @@ input[type=search] { width: 100%; height: 3rem; border: 1px solid var(--line); b
 .pane { display: none; flex-direction: column; gap: 0.75rem; }
 .wrap.pane-play .pane-play,
 .wrap.pane-practice .pane-practice,
+.wrap.pane-groove .pane-groove,
 .wrap.pane-songs .pane-songs { display: flex; }
 .library, .rail-groove { display: flex; flex-direction: column; gap: .75rem; }
-.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .25rem; padding: .5rem 1rem max(.75rem, env(safe-area-inset-bottom)); background: rgb(17 16 14 / .94); }
-.tabs button { min-height: 2.7rem; border: 0; border-radius: .5rem; background: transparent; color: var(--fg); font: 600 .95rem Figtree, sans-serif; }
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: .2rem; padding: .5rem .6rem max(.75rem, env(safe-area-inset-bottom)); background: rgb(17 16 14 / .94); }
+.tabs button { min-height: 2.7rem; border: 0; border-radius: .5rem; background: transparent; color: var(--fg); font: 600 .88rem Figtree, sans-serif; }
 .tabs button.on { background: var(--card); }
