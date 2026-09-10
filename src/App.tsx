@@ -12,6 +12,7 @@ import { useWakeLock } from "./hooks/useWakeLock";
 const TABS = [
   { id: "play" as const, label: "Play" },
   { id: "practice" as const, label: "Practice" },
+  { id: "groove" as const, label: "Groove" },
   { id: "songs" as const, label: "Songs" },
 ];
 
@@ -56,6 +57,9 @@ export default function App() {
 
         <div className="pane pane-practice">
           <PracticePanel />
+        </div>
+
+        <div className="pane pane-groove">
           <GroovePanel />
           <Transport mode="kits" />
         </div>
@@ -64,7 +68,7 @@ export default function App() {
           <Library />
         </div>
 
-        <nav className="tabs tabs-3">
+        <nav className="tabs tabs-4">
           {TABS.map((t) => (
             <button
               key={t.id}
