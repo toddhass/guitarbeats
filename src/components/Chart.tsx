@@ -10,18 +10,26 @@ export function Chart({ capo }: { capo: number }) {
   const bar = Math.floor(step / 4) % chords.length;
 
   return (
-    <section className="card chart">
-      <p className="kicker">Chart</p>
-      <p className="hint">GuitarBeats lead sheet — original chart, not a licensed official tab.</p>
-      <div className="measures">
+    <div className="chart-block" style={{ marginTop: "1rem" }}>
+      <p className="label">Chart</p>
+      <p className="hint">Our lead sheet. Not a licensed official transcription.</p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.4rem" }}>
         {chords.map((c, i) => (
-          <div key={c + i} className={`measure${playing && i === bar ? " on" : ""}`}>
-            <span className="bar-num">{i + 1}</span>
-            <strong>{c}</strong>
-            <span className="slash">/ / / /</span>
+          <div
+            key={c + i}
+            style={{
+              padding: "0.65rem 0.7rem",
+              borderRadius: "0.5rem",
+              background: playing && i === bar ? "var(--primary)" : "var(--secondary)",
+              color: playing && i === bar ? "var(--primary-fg)" : "inherit",
+            }}
+          >
+            <div style={{ fontSize: "0.75rem", opacity: 0.7 }}>Bar {i + 1}</div>
+            <div style={{ fontSize: "1.25rem", fontWeight: 700 }}>{c}</div>
+            <div style={{ letterSpacing: "0.2em", fontSize: "0.85rem" }}>/ / / /</div>
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }
