@@ -11,11 +11,10 @@ export function PracticePanel() {
   const loopPart = useApp((s) => s.loopPart);
   const countIn = useApp((s) => s.countIn);
   const speed = useApp((s) => s.speed);
-  const capo = useApp((s) => s.capo);
   const setLoopPart = useApp((s) => s.setLoopPart);
   const setCountIn = useApp((s) => s.setCountIn);
   const setSpeed = useApp((s) => s.setSpeed);
-  const setCapo = useApp((s) => s.setCapo);
+  const [capo, setCapo] = useState(0);
   const chords = chordsFor(song.id, song.feel);
   const timed = Math.floor(step / 4) % chords.length;
   const [held, setHeld] = useState<number | null>(null);
@@ -35,7 +34,7 @@ export function PracticePanel() {
       <div className="chips">
         {Array.from({ length: 8 }, (_, n) => (
           <button key={n} type="button" className={`chip${capo === n ? " on" : ""}`} onClick={() => setCapo(n)}>
-            {n === 0 ? "Open" : n}
+            {n === 0 ? "Open" : String(n)}
           </button>
         ))}
       </div>

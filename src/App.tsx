@@ -6,6 +6,7 @@ import { PracticePanel } from "./components/PracticePanel";
 import { Library } from "./components/Library";
 import { GroovePanel } from "./components/GroovePanel";
 import { bindRemote, syncMediaSession } from "./remote";
+import { useWakeLock } from "./hooks/useWakeLock";
 
 export default function App() {
   const tab = useApp((s) => s.tab);
@@ -13,6 +14,8 @@ export default function App() {
   const playing = useApp((s) => s.playing);
   const song = useApp((s) => s.song);
   const bpm = useApp((s) => s.bpm);
+
+  useWakeLock(playing);
 
   useEffect(() => {
     document.body.className = `pane-${tab}`;
@@ -50,7 +53,7 @@ export default function App() {
         <button type="button" className={tab === "track" ? "on" : ""} onPointerDown={(e) => { e.preventDefault(); setTab("track"); }}>Groove</button>
       </nav>
 
-      <p className="foot">AirPods play/pause works after Start. Siri Shortcuts can open ?cmd=start or ?cmd=stop.</p>
+      <p className="foot">Screen stays awake while playing.</p>
     </div>
   );
 }
