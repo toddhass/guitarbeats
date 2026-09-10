@@ -5,15 +5,26 @@ import { Transport } from "./components/Transport";
 import { PracticePanel } from "./components/PracticePanel";
 import { Library } from "./components/Library";
 import { GroovePanel } from "./components/GroovePanel";
+import { bindRemote, syncMediaSession } from "./remote";
 
 export default function App() {
   const tab = useApp((s) => s.tab);
   const setTab = useApp((s) => s.setTab);
   const playing = useApp((s) => s.playing);
+  const song = useApp((s) => s.song);
+  const bpm = useApp((s) => s.bpm);
 
   useEffect(() => {
     document.body.className = `pane-${tab}`;
   }, [tab]);
+
+  useEffect(() => {
+    bindRemote();
+  }, []);
+
+  useEffect(() => {
+    syncMediaSession();
+  }, [playing, song, bpm]);
 
   return (
     <div className={`wrap pane-${tab}`}>
@@ -39,7 +50,7 @@ export default function App() {
         <button type="button" className={tab === "track" ? "on" : ""} onPointerDown={(e) => { e.preventDefault(); setTab("track"); }}>Groove</button>
       </nav>
 
-      <p className="foot">Practice tools are off until you tap them.</p>
+      <p className="foot">AirPods play/pause works after Start. Siri Shortcuts can open ?cmd=start or ?cmd=stop.</p>
     </div>
   );
 }
