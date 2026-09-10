@@ -17,6 +17,8 @@ export class Sequencer {
   crashQueued = false;
   loopPart = false;
   countInLeft = 0;
+  clickOn = false;
+  clickLevel = 0.7;
   onNext?: (step: number, part: SongPart) => void;
 
   constructor(synth: Synth, ctx: AudioContext) {
@@ -43,15 +45,17 @@ export class Sequencer {
   }
 
   private click(time: number, downbeat: boolean) {
-    this.synth.trig(downbeat ? "rim" : "hat", time, downbeat ? 1 : 0.45);
+    this.synth.stick(time, this.clickLevel, downbeat);
   }
 
   private scheduleStep(i: number, time: number, part: SongPart, useFill: boolean) {
     const pattern: Partial<Pattern> = useFill && part.fill ? part.fill : part.groove;
+    const accent = i === 0 ? 1.28 : i % 4 === 0 ? 1.08 : 1;
     for (const voice of Object.keys(pattern)) {
       const v = hit(pattern[voice], i);
-      if (v > 0) this.synth.trig(voice as DrumVoice, time, v);
+      if (v > 0) this.synth.trig(voice as DrumVoice, time, v * accent);
     }
+    if (this.clickOn && i % 4 === 0) this.click(time, i === 0);
     if (this.crashQueued) {
       this.synth.trig("crash", time, 1);
       this.crashQueued = false;

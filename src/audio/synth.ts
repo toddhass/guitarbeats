@@ -1,9 +1,11 @@
 export type DrumVoice = "kick" | "snare" | "clap" | "rim" | "hat" | "openHat" | "pedalHat" | "ride" | "crash" | "splash" | "china" | "highTom" | "tom" | "floor" | "cowbell";
+export type Kit = "dry" | "room";
 
 export class Synth {
   ctx: AudioContext;
   dest: AudioNode;
   noise: AudioBuffer;
+  kit: Kit = "room";
   constructor(ctx: AudioContext, dest: AudioNode) {
     this.ctx = ctx;
     this.dest = dest;
@@ -33,44 +35,64 @@ export class Synth {
     s.stop(t + dur);
     return s;
   }
+  private roomy() {
+    return this.kit === "room";
+  }
   kick(t: number, v: number) {
+    const room = this.roomy();
     const o = this.ctx.createOscillator(); o.type = "sine";
-    o.frequency.setValueAtTime(160, t);
-    o.frequency.exponentialRampToValueAtTime(38, t + 0.1);
-    const g = this.env(t, 1.4 * v, 0.36);
+    o.frequency.setValueAtTime(room ? 168 : 140, t);
+    o.frequency.exponentialRampToValueAtTime(room ? 36 : 48, t + (room ? 0.12 : 0.07));
+    const g = this.env(t, (room ? 1.55 : 1.15) * v, room ? 0.42 : 0.22);
     o.connect(g); g.connect(this.dest);
-    o.start(t); o.stop(t + 0.4);
+    o.start(t); o.stop(t + (room ? 0.45 : 0.22));
+    if (room) {
+      const click = this.ctx.createOscillator(); click.type = "square";
+      click.frequency.setValueAtTime(90, t);
+      const cg = this.env(t, 0.18 * v, 0.03);
+      click.connect(cg); cg.connect(this.dest);
+      click.start(t); click.stop(t + 0.04);
+    }
   }
   snare(t: number, v: number) {
-    const n = this.ns(t, 0.22);
-    const bp = this.ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 1800;
-    const g = this.env(t, 0.85 * v, 0.16);
+    const room = this.roomy();
+    const n = this.ns(t, room ? 0.32 : 0.14);
+    const bp = this.ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = room ? 1600 : 2200;
+    const g = this.env(t, (room ? 0.95 : 0.7) * v, room ? 0.22 : 0.1);
     n.connect(bp); bp.connect(g); g.connect(this.dest);
-    const o = this.ctx.createOscillator(); o.type = "triangle"; o.frequency.setValueAtTime(196, t);
-    const tg = this.env(t, 0.38 * v, 0.1);
+    const o = this.ctx.createOscillator(); o.type = "triangle"; o.frequency.setValueAtTime(room ? 180 : 210, t);
+    const tg = this.env(t, (room ? 0.42 : 0.28) * v, room ? 0.14 : 0.07);
     o.connect(tg); tg.connect(this.dest); o.start(t); o.stop(t + 0.18);
   }
   hat(t: number, v: number, dec: number) {
-    const n = this.ns(t, dec + 0.04);
-    const hp = this.ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 6800;
-    const g = this.env(t, (dec > 0.1 ? 0.26 : 0.22) * v, dec);
+    const room = this.roomy();
+    const n = this.ns(t, dec + (room ? 0.06 : 0.02));
+    const hp = this.ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = room ? 6200 : 7800;
+    const g = this.env(t, (dec > 0.1 ? 0.28 : 0.2) * v * (room ? 1 : 0.85), dec * (room ? 1.15 : 0.75));
     n.connect(hp); hp.connect(g); g.connect(this.dest);
   }
   crash(t: number, v: number) {
-    const n = this.ns(t, 0.9);
-    const hp = this.ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 5000;
-    const g = this.env(t, 0.45 * v, 0.8);
+    const n = this.ns(t, this.roomy() ? 1.1 : 0.55);
+    const hp = this.ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = this.roomy() ? 4800 : 6200;
+    const g = this.env(t, 0.45 * v, this.roomy() ? 0.95 : 0.45);
     n.connect(hp); hp.connect(g); g.connect(this.dest);
   }
   tom(t: number, v: number, f: number) {
     const o = this.ctx.createOscillator(); o.type = "sine";
     o.frequency.setValueAtTime(f, t);
-    o.frequency.exponentialRampToValueAtTime(f * 0.6, t + 0.18);
-    const g = this.env(t, 0.7 * v, 0.2);
+    o.frequency.exponentialRampToValueAtTime(f * 0.6, t + (this.roomy() ? 0.2 : 0.12));
+    const g = this.env(t, 0.7 * v, this.roomy() ? 0.24 : 0.14);
     o.connect(g); g.connect(this.dest); o.start(t); o.stop(t + 0.25);
   }
+  stick(t: number, v: number, downbeat: boolean) {
+    const o = this.ctx.createOscillator(); o.type = "square";
+    o.frequency.setValueAtTime(downbeat ? 1400 : 1900, t);
+    const g = this.env(t, (downbeat ? 0.28 : 0.16) * v, downbeat ? 0.06 : 0.035);
+    o.connect(g); g.connect(this.dest);
+    o.start(t); o.stop(t + 0.08);
+  }
   trig(voice: DrumVoice, t: number, v: number) {
-    v = Math.max(0.05, Math.min(1.4, v));
+    v = Math.max(0.05, Math.min(1.6, v));
     if (voice === "kick") this.kick(t, v);
     else if (voice === "snare" || voice === "clap") this.snare(t, v);
     else if (voice === "rim") this.tom(t, v * 0.8, 420);
