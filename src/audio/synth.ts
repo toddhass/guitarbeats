@@ -1,7 +1,8 @@
 import { SampleBank } from "./samples";
+import { Kit } from "./kits";
+export type { Kit } from "./kits";
 
 export type DrumVoice = "kick" | "snare" | "clap" | "rim" | "hat" | "openHat" | "pedalHat" | "ride" | "crash" | "splash" | "china" | "highTom" | "tom" | "floor" | "cowbell";
-export type Kit = "dry" | "room";
 
 export class Synth {
   ctx: AudioContext;
@@ -13,8 +14,7 @@ export class Synth {
     this.ctx = ctx;
     this.dest = dest;
     this.samples = new SampleBank(ctx);
-    void this.samples.load("room");
-    void this.samples.load("dry");
+    void this.samples.loadAll();
     const n = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const d = n.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;

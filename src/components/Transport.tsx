@@ -1,5 +1,6 @@
 import { useApp } from "../state/store";
 import { STYLES } from "../data/grooves";
+import { KITS } from "../audio/kits";
 
 export function Transport() {
   const playing = useApp((s) => s.playing);
@@ -51,8 +52,9 @@ export function Transport() {
         </div>
         <p className="label" style={{ marginTop: "0.85rem" }}>Kit</p>
         <div className="chips">
-          <button type="button" className={`chip${kit === "dry" ? " on" : ""}`} {...press(() => setKit("dry"))}>Dry room</button>
-          <button type="button" className={`chip${kit === "room" ? " on" : ""}`} {...press(() => setKit("room"))}>Country room</button>
+          {KITS.map((k) => (
+            <button key={k.id} type="button" className={`chip${kit === k.id ? " on" : ""}`} {...press(() => setKit(k.id))}>{k.label}</button>
+          ))}
           <button type="button" className={`chip${clickOn ? " on" : ""}`} {...press(() => setClickOn(!clickOn))}>Click</button>
         </div>
         <div className="sliders" style={{ marginTop: "1rem" }}>
