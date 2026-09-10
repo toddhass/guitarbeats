@@ -8,6 +8,12 @@ import { GroovePanel } from "./components/GroovePanel";
 import { bindRemote, syncMediaSession } from "./remote";
 import { useWakeLock } from "./hooks/useWakeLock";
 
+const TABS = [
+  { id: "play" as const, label: "Play" },
+  { id: "practice" as const, label: "Practice" },
+  { id: "songs" as const, label: "Songs" },
+];
+
 export default function App() {
   const tab = useApp((s) => s.tab);
   const setTab = useApp((s) => s.setTab);
@@ -39,21 +45,36 @@ export default function App() {
         <span className={`badge${playing ? " on" : ""}`}>{playing ? "Playing" : "Ready"}</span>
       </header>
 
-      <div className="player">
+      <div className="pane pane-play">
         <NowPlaying />
-        <Transport />
-        <PracticePanel />
+        <Transport mode="play" />
       </div>
 
-      <Library />
-      <GroovePanel />
+      <div className="pane pane-practice">
+        <PracticePanel />
+        <GroovePanel />
+        <Transport mode="kits" />
+      </div>
 
-      <nav className="tabs">
-        <button type="button" className={tab === "songs" ? "on" : ""} onPointerDown={(e) => { e.preventDefault(); setTab("songs"); }}>Songs</button>
-        <button type="button" className={tab === "track" ? "on" : ""} onPointerDown={(e) => { e.preventDefault(); setTab("track"); }}>Groove</button>
+      <div className="pane pane-songs">
+        <Library />
+      </div>
+
+      <nav className="tabs tabs-3">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            className={tab === t.id ? "on" : ""}
+            onPointerDown={(e) => {
+              e.preventDefault();
+              setTab(t.id);
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
       </nav>
-
-      <p className="foot">Screen stays awake while playing.</p>
     </div>
   );
 }

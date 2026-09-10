@@ -2,7 +2,7 @@ import { useApp } from "../state/store";
 import { STYLES } from "../data/grooves";
 import { KITS } from "../audio/kits";
 
-export function Transport() {
+export function Transport({ mode = "play" }: { mode?: "play" | "kits" }) {
   const playing = useApp((s) => s.playing);
   const toggleStart = useApp((s) => s.toggleStart);
   const fill = useApp((s) => s.fill);
@@ -32,6 +32,27 @@ export function Transport() {
     };
   }
 
+  if (mode === "kits") {
+    return (
+      <section className="card transport-groove">
+        <p className="label">Kit</p>
+        <div className="chips">
+          {KITS.map((k) => (
+            <button key={k.id} type="button" className={`chip${kit === k.id ? " on" : ""}`} {...press(() => setKit(k.id))}>{k.label}</button>
+          ))}
+          <button type="button" className={`chip${clickOn ? " on" : ""}`} {...press(() => setClickOn(!clickOn))}>Click</button>
+        </div>
+        <div className="sliders" style={{ marginTop: "1rem" }}>
+          <label className="sl">
+            Click
+            <input type="range" min={0} max={100} value={clickLevel} onChange={(e) => setClickLevel(Number(e.target.value))} />
+            <span>{clickLevel}</span>
+          </label>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <>
       <button className={`start${playing ? " stop" : ""}`} type="button" {...press(toggleStart)}>
@@ -44,20 +65,7 @@ export function Transport() {
         <button className="pedal crash" type="button" {...press(crash)}>Crash</button>
       </div>
       <section className="card transport-groove">
-        <p className="label">Groove</p>
-        <div className="chips">
-          {STYLES.map((s) => (
-            <button key={s.id} type="button" className={`chip${song.feel === s.id ? " on" : ""}`} {...press(() => selectFeel(s.id))}>{s.label}</button>
-          ))}
-        </div>
-        <p className="label" style={{ marginTop: "0.85rem" }}>Kit</p>
-        <div className="chips">
-          {KITS.map((k) => (
-            <button key={k.id} type="button" className={`chip${kit === k.id ? " on" : ""}`} {...press(() => setKit(k.id))}>{k.label}</button>
-          ))}
-          <button type="button" className={`chip${clickOn ? " on" : ""}`} {...press(() => setClickOn(!clickOn))}>Click</button>
-        </div>
-        <div className="sliders" style={{ marginTop: "1rem" }}>
+        <div className="sliders">
           <label className="sl">
             Tempo
             <input type="range" min={40} max={240} value={bpm} onChange={(e) => setBpm(Number(e.target.value))} />
@@ -68,11 +76,12 @@ export function Transport() {
             <input type="range" min={0} max={100} value={volume} onChange={(e) => setVolume(Number(e.target.value))} />
             <span>{volume}</span>
           </label>
-          <label className="sl">
-            Click
-            <input type="range" min={0} max={100} value={clickLevel} onChange={(e) => setClickLevel(Number(e.target.value))} />
-            <span>{clickLevel}</span>
-          </label>
+        </div>
+        <p className="label" style={{ marginTop: "0.85rem" }}>Feel</p>
+        <div className="chips">
+          {STYLES.map((s) => (
+            <button key={s.id} type="button" className={`chip${song.feel === s.id ? " on" : ""}`} {...press(() => selectFeel(s.id))}>{s.label}</button>
+          ))}
         </div>
       </section>
     </>
