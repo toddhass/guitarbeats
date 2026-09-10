@@ -1,1 +1,1 @@
-export type Tab = "play" | "practice" | "songs";
+export type Tab = "play" | "practice" | "groove" | "songs";
