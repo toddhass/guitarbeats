@@ -55,23 +55,31 @@ export default function App() {
           <span className={`badge${playing ? " on" : ""}`}>{playing ? "Playing" : "Ready"}</span>
         </header>
 
-        <div className="pane pane-play" hidden={tab !== "play"} style={{ display: tab === "play" ? "flex" : "none" }}>
-          <NowPlaying />
-          <Transport mode="play" />
-        </div>
+        {tab === "play" && (
+          <div className="pane pane-play">
+            <NowPlaying />
+            <Transport mode="play" />
+          </div>
+        )}
 
-        <div className="pane pane-practice" hidden={tab !== "practice"} style={{ display: tab === "practice" ? "flex" : "none" }}>
-          <PracticePanel />
-        </div>
+        {tab === "practice" && (
+          <div className="pane pane-practice">
+            <PracticePanel />
+          </div>
+        )}
 
-        <div className="pane pane-groove" hidden={tab !== "groove"} style={{ display: tab === "groove" ? "flex" : "none" }}>
-          <GroovePanel />
-          <Transport mode="kits" />
-        </div>
+        {tab === "groove" && (
+          <div className="pane pane-groove">
+            <GroovePanel />
+            <Transport mode="kits" />
+          </div>
+        )}
 
-        <div className="pane pane-songs" hidden={tab !== "songs"} style={{ display: tab === "songs" ? "flex" : "none" }}>
-          <Library />
-        </div>
+        {tab === "songs" && (
+          <div className="pane pane-songs">
+            <Library />
+          </div>
+        )}
 
         <nav className="tabs tabs-4">
           {TABS.map((t) => (
