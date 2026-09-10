@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Synth } from "../audio/synth";
+import { Kit, Synth } from "../audio/synth";
 import { Sequencer } from "../audio/sequencer";
 import { createAudioContext, unlockAudio } from "../audio/unlock";
 import { searchAppleMusic, hitToSeed } from "../api";
@@ -57,6 +57,9 @@ export const useApp = create<{
   loopPart: boolean;
   countIn: boolean;
   speed: Speed;
+  kit: Kit;
+  clickOn: boolean;
+  clickLevel: number;
   setTab: (t: "songs" | "track") => void;
   setQuery: (q: string) => void;
   selectSong: (id: string) => void;
@@ -66,15 +69,26 @@ export const useApp = create<{
   setLoopPart: (v: boolean) => void;
   setCountIn: (v: boolean) => void;
   setSpeed: (v: Speed) => void;
+  setKit: (k: Kit) => void;
+  setClickOn: (v: boolean) => void;
+  setClickLevel: (n: number) => void;
   toggleStart: () => void;
   fill: () => void;
   nextPart: () => void;
   restart: () => void;
   crash: () => void;
 }>((set, get) => {
+  function applyKitClick() {
+    const { synth, seq } = getEngine();
+    synth.kit = get().kit;
+    seq.clickOn = get().clickOn;
+    seq.clickLevel = Math.max(0, Math.min(1, get().clickLevel / 100));
+  }
+
   function beginPlayback(song: Song) {
     const { ctx, seq, synth } = getEngine();
     unlockAudio(ctx);
+    applyKitClick();
     seq.stop();
     seq.setParts(song.parts, true);
     seq.loopPart = get().loopPart;
@@ -113,6 +127,9 @@ export const useApp = create<{
     loopPart: false,
     countIn: false,
     speed: 1,
+    kit: "room",
+    clickOn: false,
+    clickLevel: 70,
 
     setTab: (t) => set({ tab: t }),
     setLoopPart: (v) => {
@@ -124,6 +141,18 @@ export const useApp = create<{
       const bpm = Math.max(40, Math.round(get().song.bpm * v));
       getEngine().seq.bpm = bpm;
       set({ speed: v, bpm });
+    },
+    setKit: (k) => {
+      getEngine().synth.kit = k;
+      set({ kit: k });
+    },
+    setClickOn: (v) => {
+      getEngine().seq.clickOn = v;
+      set({ clickOn: v });
+    },
+    setClickLevel: (n) => {
+      getEngine().seq.clickLevel = Math.max(0, Math.min(1, n / 100));
+      set({ clickLevel: n });
     },
 
     setQuery: (q) => {
