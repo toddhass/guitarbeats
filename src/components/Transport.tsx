@@ -14,6 +14,12 @@ export function Transport() {
   const setBpm = useApp((s) => s.setBpm);
   const volume = useApp((s) => s.volume);
   const setVolume = useApp((s) => s.setVolume);
+  const kit = useApp((s) => s.kit);
+  const setKit = useApp((s) => s.setKit);
+  const clickOn = useApp((s) => s.clickOn);
+  const setClickOn = useApp((s) => s.setClickOn);
+  const clickLevel = useApp((s) => s.clickLevel);
+  const setClickLevel = useApp((s) => s.setClickLevel);
 
   function press(fn: () => void) {
     return {
@@ -40,15 +46,14 @@ export function Transport() {
         <p className="label">Groove</p>
         <div className="chips">
           {STYLES.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              className={`chip${song.feel === s.id ? " on" : ""}`}
-              {...press(() => selectFeel(s.id))}
-            >
-              {s.label}
-            </button>
+            <button key={s.id} type="button" className={`chip${song.feel === s.id ? " on" : ""}`} {...press(() => selectFeel(s.id))}>{s.label}</button>
           ))}
+        </div>
+        <p className="label" style={{ marginTop: "0.85rem" }}>Kit</p>
+        <div className="chips">
+          <button type="button" className={`chip${kit === "dry" ? " on" : ""}`} {...press(() => setKit("dry"))}>Dry room</button>
+          <button type="button" className={`chip${kit === "room" ? " on" : ""}`} {...press(() => setKit("room"))}>Country room</button>
+          <button type="button" className={`chip${clickOn ? " on" : ""}`} {...press(() => setClickOn(!clickOn))}>Click</button>
         </div>
         <div className="sliders" style={{ marginTop: "1rem" }}>
           <label className="sl">
@@ -60,6 +65,11 @@ export function Transport() {
             Volume
             <input type="range" min={0} max={100} value={volume} onChange={(e) => setVolume(Number(e.target.value))} />
             <span>{volume}</span>
+          </label>
+          <label className="sl">
+            Click
+            <input type="range" min={0} max={100} value={clickLevel} onChange={(e) => setClickLevel(Number(e.target.value))} />
+            <span>{clickLevel}</span>
           </label>
         </div>
       </section>
