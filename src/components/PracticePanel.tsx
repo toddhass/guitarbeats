@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApp } from "../state/store";
 import { chordsFor } from "../data/chords";
 import { withCapo } from "../data/capo";
+import { STRUMS, StrumId } from "../data/strums";
 import { ChordDiagram } from "./ChordDiagram";
+
+const STRUM_KEY = "gb-strum";
 
 export function PracticePanel() {
   const song = useApp((s) => s.song);
@@ -15,10 +18,22 @@ export function PracticePanel() {
   const setCountIn = useApp((s) => s.setCountIn);
   const setSpeed = useApp((s) => s.setSpeed);
   const [capo, setCapo] = useState(0);
+  const [strumId, setStrumId] = useState<StrumId>("eighths");
   const chords = chordsFor(song.id, song.feel);
   const timed = Math.floor(step / 4) % chords.length;
   const [held, setHeld] = useState<number | null>(null);
   const active = held ?? timed;
+  const strum = STRUMS.find((s) => s.id === strumId) ?? STRUMS[0];
+
+  useEffect(() => {
+    const saved = localStorage.getItem(STRUM_KEY) as StrumId | null;
+    if (saved && STRUMS.some((s) => s.id === saved)) setStrumId(saved);
+  }, []);
+
+  function pickStrum(id: StrumId) {
+    setStrumId(id);
+    localStorage.setItem(STRUM_KEY, id);
+  }
 
   return (
     <section className="card practice">
@@ -38,6 +53,14 @@ export function PracticePanel() {
           </button>
         ))}
       </div>
+      <p className="label" style={{ marginTop: "0.85rem" }}>Strum</p>
+      <div className="chips">
+        {STRUMS.map((s) => (
+          <button key={s.id} type="button" className={`chip${strumId === s.id ? " on" : ""}`} onClick={() => pickStrum(s.id)}>
+            {s.label}
+          </button>
+        ))}
+      </div>
       <p className="label" style={{ marginTop: "0.85rem" }}>Left hand — tap a chord to hold the shape</p>
       <div className="chords">
         {chords.map((c, i) => (
@@ -51,7 +74,7 @@ export function PracticePanel() {
           </button>
         ))}
       </div>
-      <ChordDiagram chord={chords[active] ?? "G"} capo={capo} step={step} playing={playing} />
+      <ChordDiagram chord={chords[active] ?? "G"} capo={capo} step={step} playing={playing} cells={strum.cells} />
     </section>
   );
 }

@@ -1,19 +1,21 @@
 import { shapeFor } from "../data/shapes";
 import { withCapo } from "../data/capo";
+import { BEAT_LABELS, Stroke, strokeMark } from "../data/strums";
 
 const STR = ["E", "A", "D", "G", "B", "e"];
-const STRUM = ["1 \u2193", "& \u2191", "2 \u2193", "& \u2191", "3 \u2193", "& \u2191", "4 \u2193", "& \u2191"];
 
 export function ChordDiagram({
   chord,
   capo,
   step,
   playing,
+  cells,
 }: {
   chord: string;
   capo: number;
   step: number;
   playing: boolean;
+  cells: Stroke[];
 }) {
   const s = shapeFor(chord);
   const shown = withCapo(chord, capo);
@@ -58,8 +60,10 @@ export function ChordDiagram({
       <p className="hint">{s.tip}{capo > 0 ? ` Keep this shape. Sounding pitch is ${shown}.` : ""}</p>
       <p className="label">Right hand</p>
       <div className="strum">
-        {STRUM.map((label, i) => (
-          <span key={label} className={i === hit ? "on" : ""}>{label}</span>
+        {cells.map((stroke, i) => (
+          <span key={i} className={i === hit ? "on" : ""}>
+            {BEAT_LABELS[i]} {strokeMark(stroke)}
+          </span>
         ))}
       </div>
     </div>
