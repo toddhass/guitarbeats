@@ -1,3 +1,5 @@
+import { SampleBank } from "./samples";
+
 export type DrumVoice = "kick" | "snare" | "clap" | "rim" | "hat" | "openHat" | "pedalHat" | "ride" | "crash" | "splash" | "china" | "highTom" | "tom" | "floor" | "cowbell";
 export type Kit = "dry" | "room";
 
@@ -6,9 +8,13 @@ export class Synth {
   dest: AudioNode;
   noise: AudioBuffer;
   kit: Kit = "room";
+  samples: SampleBank;
   constructor(ctx: AudioContext, dest: AudioNode) {
     this.ctx = ctx;
     this.dest = dest;
+    this.samples = new SampleBank(ctx);
+    void this.samples.load("room");
+    void this.samples.load("dry");
     const n = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const d = n.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
@@ -46,13 +52,6 @@ export class Synth {
     const g = this.env(t, (room ? 1.55 : 1.15) * v, room ? 0.42 : 0.22);
     o.connect(g); g.connect(this.dest);
     o.start(t); o.stop(t + (room ? 0.45 : 0.22));
-    if (room) {
-      const click = this.ctx.createOscillator(); click.type = "square";
-      click.frequency.setValueAtTime(90, t);
-      const cg = this.env(t, 0.18 * v, 0.03);
-      click.connect(cg); cg.connect(this.dest);
-      click.start(t); click.stop(t + 0.04);
-    }
   }
   snare(t: number, v: number) {
     const room = this.roomy();
@@ -93,6 +92,13 @@ export class Synth {
   }
   trig(voice: DrumVoice, t: number, v: number) {
     v = Math.max(0.05, Math.min(1.6, v));
+    const sampleVoice =
+      voice === "clap" ? "snare" :
+      voice === "openHat" || voice === "pedalHat" || voice === "ride" ? "hat" :
+      voice === "crash" || voice === "splash" || voice === "china" ? "crash" :
+      voice === "rim" ? "snare" :
+      voice;
+    if (this.samples.play(this.kit, sampleVoice, this.dest, t, v)) return;
     if (voice === "kick") this.kick(t, v);
     else if (voice === "snare" || voice === "clap") this.snare(t, v);
     else if (voice === "rim") this.tom(t, v * 0.8, 420);
