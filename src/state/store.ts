@@ -5,6 +5,7 @@ import { createAudioContext, unlockAudio } from "../audio/unlock";
 import { searchAppleMusic, hitToSeed } from "../api";
 import { makeSong, Song, SEEDS } from "../data/songs";
 import { Feel, LABELS, STYLES } from "../data/grooves";
+import { Tab } from "./tab-patch";
 
 interface Engine {
   ctx: AudioContext;
@@ -44,7 +45,7 @@ function ensureParts(song: Song) {
 type Speed = 0.5 | 0.7 | 1;
 
 export const useApp = create<{
-  tab: "songs" | "track";
+  tab: Tab;
   playing: boolean;
   song: Song;
   bpm: number;
@@ -60,7 +61,7 @@ export const useApp = create<{
   kit: Kit;
   clickOn: boolean;
   clickLevel: number;
-  setTab: (t: "songs" | "track") => void;
+  setTab: (t: Tab) => void;
   setQuery: (q: string) => void;
   selectSong: (id: string) => void;
   selectFeel: (feel: Feel) => void;
@@ -110,11 +111,12 @@ export const useApp = create<{
       playing: true,
       step: 0,
       partName: get().countIn ? "Count-in" : (song.parts[0]?.name ?? "Intro"),
+      tab: "play",
     });
   }
 
   return {
-    tab: "songs",
+    tab: "play",
     playing: false,
     song: initialSong,
     bpm: initialSong.bpm,
