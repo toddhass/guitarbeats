@@ -1,17 +1,21 @@
 import { useState } from "react";
 import { useApp } from "../state/store";
 import { chordsFor } from "../data/chords";
+import { withCapo } from "../data/capo";
 import { ChordDiagram } from "./ChordDiagram";
 
 export function PracticePanel() {
   const song = useApp((s) => s.song);
   const step = useApp((s) => s.step);
+  const playing = useApp((s) => s.playing);
   const loopPart = useApp((s) => s.loopPart);
   const countIn = useApp((s) => s.countIn);
   const speed = useApp((s) => s.speed);
+  const capo = useApp((s) => s.capo);
   const setLoopPart = useApp((s) => s.setLoopPart);
   const setCountIn = useApp((s) => s.setCountIn);
   const setSpeed = useApp((s) => s.setSpeed);
+  const setCapo = useApp((s) => s.setCapo);
   const chords = chordsFor(song.id, song.feel);
   const timed = Math.floor(step / 4) % chords.length;
   const [held, setHeld] = useState<number | null>(null);
@@ -27,6 +31,14 @@ export function PracticePanel() {
         <button type="button" className={`chip${speed === 0.7 ? " on" : ""}`} onClick={() => setSpeed(0.7)}>Slow</button>
         <button type="button" className={`chip${speed === 1 ? " on" : ""}`} onClick={() => setSpeed(1)}>Full</button>
       </div>
+      <p className="label" style={{ marginTop: "0.85rem" }}>Capo</p>
+      <div className="chips">
+        {Array.from({ length: 8 }, (_, n) => (
+          <button key={n} type="button" className={`chip${capo === n ? " on" : ""}`} onClick={() => setCapo(n)}>
+            {n === 0 ? "Open" : n}
+          </button>
+        ))}
+      </div>
       <p className="label" style={{ marginTop: "0.85rem" }}>Left hand — tap a chord to hold the shape</p>
       <div className="chords">
         {chords.map((c, i) => (
@@ -36,11 +48,11 @@ export function PracticePanel() {
             className={`chord${i === active ? " on" : ""}`}
             onClick={() => setHeld(held === i ? null : i)}
           >
-            {c}
+            {withCapo(c, capo)}
           </button>
         ))}
       </div>
-      <ChordDiagram chord={chords[active] ?? "G"} />
+      <ChordDiagram chord={chords[active] ?? "G"} capo={capo} step={step} playing={playing} />
     </section>
   );
 }
