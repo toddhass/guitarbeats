@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useApp } from "../state/store";
 import { chordsFor } from "../data/chords";
 import { withCapo } from "../data/capo";
@@ -17,11 +17,14 @@ export function PracticePanel() {
   const setLoopPart = useApp((s) => s.setLoopPart);
   const setCountIn = useApp((s) => s.setCountIn);
   const setSpeed = useApp((s) => s.setSpeed);
+  const holdPause = useApp((s) => s.holdPause);
+  const holdResume = useApp((s) => s.holdResume);
   const [capo, setCapo] = useState(0);
   const [strumId, setStrumId] = useState<StrumId>("eighths");
   const chords = chordsFor(song.id, song.feel);
   const timed = Math.floor(step / 4) % chords.length;
   const [held, setHeld] = useState<number | null>(null);
+  const resumeAfter = useRef(false);
   const active = held ?? timed;
   const strum = STRUMS.find((s) => s.id === strumId) ?? STRUMS[0];
 
@@ -33,6 +36,22 @@ export function PracticePanel() {
   function pickStrum(id: StrumId) {
     setStrumId(id);
     localStorage.setItem(STRUM_KEY, id);
+  }
+
+  function toggleChord(i: number) {
+    if (held === i) {
+      setHeld(null);
+      if (resumeAfter.current) {
+        resumeAfter.current = false;
+        holdResume();
+      }
+      return;
+    }
+    if (playing) {
+      resumeAfter.current = true;
+      holdPause();
+    }
+    setHeld(i);
   }
 
   return (
@@ -61,14 +80,14 @@ export function PracticePanel() {
           </button>
         ))}
       </div>
-      <p className="label" style={{ marginTop: "0.85rem" }}>Left hand — tap a chord to hold the shape</p>
+      <p className="label" style={{ marginTop: "0.85rem" }}>Left hand — tap to hold and pause, tap again to go</p>
       <div className="chords">
         {chords.map((c, i) => (
           <button
             key={c + i}
             type="button"
             className={`chord${i === active ? " on" : ""}`}
-            onClick={() => setHeld(held === i ? null : i)}
+            onClick={() => toggleChord(i)}
           >
             {withCapo(c, capo)}
           </button>
