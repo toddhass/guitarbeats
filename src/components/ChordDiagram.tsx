@@ -24,7 +24,7 @@ export function ChordDiagram({
     <div className="diagram">
       <p className="diagram-name">
         {shown}
-        {capo > 0 && <small> {chord} shape \u00b7 capo {capo}</small>}
+        {capo > 0 && <small>{chord} shape · capo {capo}</small>}
       </p>
       <div className="fretboard" role="img" aria-label={`${shown} chord`}>
         <div className="nut">
@@ -36,9 +36,10 @@ export function ChordDiagram({
           <div key={fret} className="fret-row">
             {s.frets.map((f, i) => {
               const here = f === fret + 1;
+              const finger = s.fingers[i];
               return (
-                <span key={i} className={`cell${here ? " dot" : ""}`}>
-                  {here ? <b>{s.fingers[i] ?? ""}</b> : null}
+                <span key={i} className={`cell${here ? " dot f" + (finger ?? "") : ""}`}>
+                  {here ? <b>{finger ?? ""}</b> : null}
                 </span>
               );
             })}
@@ -48,6 +49,12 @@ export function ChordDiagram({
           {STR.map((n) => <span key={n} className="open">{n}</span>)}
         </div>
       </div>
+      <p className="fingers-key" aria-hidden="true">
+        <span className="f1">1 index</span>
+        <span className="f2">2 middle</span>
+        <span className="f3">3 ring</span>
+        <span className="f4">4 pinky</span>
+      </p>
       <p className="hint">{s.tip}{capo > 0 ? ` Keep this shape. Sounding pitch is ${shown}.` : ""}</p>
       <p className="label">Right hand</p>
       <div className="strum">
