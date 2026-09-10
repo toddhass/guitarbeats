@@ -13,7 +13,6 @@ import type { Tab } from "./state/tab-patch";
 const TABS: { id: Tab; label: string }[] = [
   { id: "play", label: "Play" },
   { id: "practice", label: "Practice" },
-  { id: "groove", label: "Groove" },
   { id: "songs", label: "Songs" },
 ];
 
@@ -65,11 +64,6 @@ export default function App() {
         {tab === "practice" && (
           <div className="pane pane-practice">
             <PracticePanel />
-          </div>
-        )}
-
-        {tab === "groove" && (
-          <div className="pane pane-groove">
             <GroovePanel />
             <Transport mode="kits" />
           </div>
@@ -81,7 +75,7 @@ export default function App() {
           </div>
         )}
 
-        <nav className="tabs tabs-4">
+        <nav className="tabs tabs-3">
           {TABS.map((t) => (
             <button
               key={t.id}
