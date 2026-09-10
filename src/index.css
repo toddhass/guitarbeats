@@ -58,6 +58,7 @@ input[type=search] { width: 100%; height: 3rem; border: 1px solid var(--line); b
 .chord.on { background: var(--primary); color: var(--primary-fg); }
 .diagram { margin-top: 1rem; }
 .diagram-name { margin: 0 0 .5rem; font-size: 1.4rem; font-weight: 600; }
+.diagram-name small { display: block; font-size: .85rem; font-weight: 500; color: var(--muted); }
 .fretboard { border: 1px solid var(--line); border-radius: .5rem; overflow: hidden; background: #141311; }
 .nut, .fret-row { display: grid; grid-template-columns: repeat(6, 1fr); }
 .fret-row { border-top: 1px solid var(--line); }
@@ -67,6 +68,7 @@ input[type=search] { width: 100%; height: 3rem; border: 1px solid var(--line); b
 .labels .open { font-size: .7rem; }
 .strum { display: grid; grid-template-columns: repeat(4, 1fr); gap: .35rem; margin: 0 0 .25rem; }
 .strum span { text-align: center; padding: .45rem 0; border-radius: .4rem; background: var(--secondary); font-size: .8rem; font-weight: 600; }
+.strum span.on { background: var(--primary); color: var(--primary-fg); }
 .foot { text-align: center; color: var(--muted); font-size: .85rem; }
 .empty { padding: .75rem .75rem; text-align: center; color: var(--muted); }
 .player { display: flex; flex-direction: column; gap: .75rem; }
