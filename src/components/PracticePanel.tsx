@@ -3,7 +3,6 @@ import { useApp } from "../state/store";
 import { chordsFor } from "../data/chords";
 import { withCapo } from "../data/capo";
 import { ChordDiagram } from "./ChordDiagram";
-import { Chart } from "./Chart";
 
 export function PracticePanel() {
   const song = useApp((s) => s.song);
@@ -39,7 +38,6 @@ export function PracticePanel() {
           </button>
         ))}
       </div>
-      <Chart capo={capo} />
       <p className="label" style={{ marginTop: "0.85rem" }}>Left hand — tap a chord to hold the shape</p>
       <div className="chords">
         {chords.map((c, i) => (
