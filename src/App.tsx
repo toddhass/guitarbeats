@@ -11,6 +11,7 @@ import { useWakeLock } from "./hooks/useWakeLock";
 import type { Tab } from "./state/tab-patch";
 
 const TABS: { id: Tab; label: string }[] = [
+  { id: "songs", label: "Songs" },
   { id: "play", label: "Play" },
   { id: "practice", label: "Practice" },
   { id: "songs", label: "Songs" },
