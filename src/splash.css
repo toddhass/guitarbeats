@@ -6,7 +6,7 @@
 .splash.out { opacity: 0; pointer-events: none; }
 .splash-photo {
   position: absolute; inset: -8%; width: 116%; height: 116%; object-fit: cover;
-  animation: splash-ken 12s ease-out forwards;
+  animation: splash-ken 20s ease-out forwards;
   filter: saturate(1.05) contrast(1.05);
 }
 .splash-veil {
