@@ -240,22 +240,22 @@ export const useApp = create<{
         set({ library: libraryBase(), searching: false });
         return;
       }
-      const local = SEEDS.filter((s) =>
-        (s.title + " " + s.artist).toLowerCase().includes(t.toLowerCase())
-      ).map(makeSong);
-      set({ library: local.length ? local : seedLibrary, searching: true });
+      const needle = t.toLowerCase();
+      const local = libraryBase().filter((s) =>
+        (s.title + " " + s.artist).toLowerCase().includes(needle)
+      );
+      set({ library: local, searching: true });
       searchTimer = window.setTimeout(() => {
         void searchAppleMusic(t)
           .then(async (hits) => {
             if (get().query.trim() !== t) return;
-            const base = local.length ? local : [];
-            const seen = new Set(base.map((s) => (s.title + "|" + s.artist).toLowerCase()));
+            const seen = new Set(local.map((s) => (s.title + "|" + s.artist).toLowerCase()));
             const extra = hits
               .map(hitToSeed)
               .filter((s) => s.title && !seen.has((s.title + "|" + s.artist).toLowerCase()))
               .slice(0, 16)
               .map(makeSong);
-            const merged = extra.length || base.length ? [...base, ...extra] : seedLibrary;
+            const merged = [...local, ...extra];
             set({ library: merged, searching: false });
             const patched = await Promise.all(
               merged.map(async (s) => {
@@ -270,7 +270,7 @@ export const useApp = create<{
           })
           .catch((err) => {
             console.warn("search failed", err);
-            set({ searching: false });
+            set({ library: local, searching: false });
           });
       }, 280);
     },
