@@ -33,6 +33,7 @@ function getEngine(): Engine {
   const seq = new Sequencer(synth, ctx);
   seq.setParts(initialSong.parts);
   seq.bpm = initialSong.bpm;
+  seq.conductor = true;
   engine = { ctx, synth, seq, masterGain };
   return engine;
 }
@@ -62,6 +63,10 @@ export const useApp = create<{
   kit: Kit;
   clickOn: boolean;
   clickLevel: number;
+  conductorOn: boolean;
+  barInPart: number;
+  barsInPart: number;
+  nextName: string;
   setTab: (t: Tab) => void;
   setQuery: (q: string) => void;
   selectSong: (id: string) => void;
@@ -75,6 +80,7 @@ export const useApp = create<{
   setKit: (k: Kit) => void;
   setClickOn: (v: boolean) => void;
   setClickLevel: (n: number) => void;
+  setConductorOn: (v: boolean) => void;
   toggleStart: () => void;
   fill: () => void;
   nextPart: () => void;
@@ -88,6 +94,19 @@ export const useApp = create<{
     synth.kit = get().kit;
     seq.clickOn = get().clickOn;
     seq.clickLevel = Math.max(0, Math.min(1, get().clickLevel / 100));
+    seq.conductor = get().conductorOn;
+  }
+
+  function bindClock() {
+    const { seq } = getEngine();
+    seq.onNext = (step, part, meta) =>
+      set({
+        step,
+        partName: part.name,
+        barInPart: meta.bar,
+        barsInPart: meta.bars,
+        nextName: meta.nextName,
+      });
   }
 
   function beginPlayback(song: Song) {
@@ -98,9 +117,10 @@ export const useApp = create<{
     seq.setParts(song.parts, true);
     seq.loopPart = get().loopPart;
     seq.countInLeft = get().countIn ? 16 : 0;
-    const bpm = Math.max(40, Math.round(song.bpm * get().speed));
+    const sourceBpm = get().conductorOn ? song.songBpm || song.bpm : song.bpm;
+    const bpm = Math.max(40, Math.round(sourceBpm * get().speed));
     seq.bpm = bpm;
-    seq.onNext = (step, part) => set({ step, partName: part.name });
+    bindClock();
     seq.start();
     if (!get().countIn) {
       try {
@@ -116,6 +136,9 @@ export const useApp = create<{
       playing: true,
       step: 0,
       partName: get().countIn ? "Count-in" : (song.parts[0]?.name ?? "Intro"),
+      barInPart: 1,
+      barsInPart: song.parts[0]?.bars ?? 1,
+      nextName: song.parts[1]?.name ?? "",
       tab: tab === "songs" ? "play" : tab,
     });
   }
@@ -148,6 +171,10 @@ export const useApp = create<{
     kit: "room",
     clickOn: false,
     clickLevel: 70,
+    conductorOn: true,
+    barInPart: 1,
+    barsInPart: initialSong.parts[0]?.bars ?? 8,
+    nextName: initialSong.parts[1]?.name ?? "",
 
     setTab: (t) => set({ tab: t }),
     setLoopPart: (v) => {
@@ -156,7 +183,8 @@ export const useApp = create<{
     },
     setCountIn: (v) => set({ countIn: v }),
     setSpeed: (v) => {
-      const bpm = Math.max(40, Math.round(get().song.bpm * v));
+      const base = get().conductorOn ? (get().song.songBpm || get().song.bpm) : get().song.bpm;
+      const bpm = Math.max(40, Math.round(base * v));
       getEngine().seq.bpm = bpm;
       set({ speed: v, bpm });
     },
@@ -171,6 +199,17 @@ export const useApp = create<{
     setClickLevel: (n) => {
       getEngine().seq.clickLevel = Math.max(0, Math.min(1, n / 100));
       set({ clickLevel: n });
+    },
+    setConductorOn: (v) => {
+      getEngine().seq.conductor = v;
+      const song = get().song;
+      if (v) {
+        const bpm = Math.max(40, Math.round((song.songBpm || song.bpm) * get().speed));
+        getEngine().seq.bpm = bpm;
+        set({ conductorOn: true, bpm });
+      } else {
+        set({ conductorOn: false });
+      }
     },
 
     setQuery: (q) => {
@@ -223,7 +262,8 @@ export const useApp = create<{
       if (!song) return;
       void resolveSong(song).then((ready) => {
         const list = get().library.map((s) => (s.id === ready.id ? ready : s));
-        set({ library: list, tab: "play" });
+        set({ library: list, tab: "play", conductorOn: true });
+        getEngine().seq.conductor = true;
         beginPlayback(ready);
       });
     },
@@ -234,7 +274,7 @@ export const useApp = create<{
         id: cur.id.startsWith("it-") ? cur.id : `custom-${feel}`,
         title: cur.id.startsWith("it-") ? cur.title : LABELS[feel],
         artist: cur.id.startsWith("it-") ? cur.artist : (STYLES.find((s) => s.id === feel)?.label ?? feel),
-        bpm: get().song.bpm,
+        bpm: get().song.songBpm || get().song.bpm,
         feel,
         genre: cur.genre,
       });
@@ -243,7 +283,13 @@ export const useApp = create<{
       seq.setParts(song.parts, true);
       const bpm = Math.max(40, Math.round(get().bpm));
       seq.bpm = bpm;
-      set({ song: { ...song, bpm }, partName: song.parts[0]?.name ?? "Intro", bpm });
+      set({
+        song: { ...song, bpm, songBpm: song.songBpm || bpm },
+        partName: song.parts[0]?.name ?? "Intro",
+        bpm,
+        barsInPart: song.parts[0]?.bars ?? 1,
+        nextName: song.parts[1]?.name ?? "",
+      });
     },
 
     selectPart: (id) => {
@@ -255,12 +301,20 @@ export const useApp = create<{
       ensureParts(song);
       seq.partIndex = i;
       seq.step = 0;
-      set({ partName: song.parts[i].name, step: 0 });
+      seq.barsPlayed = 0;
+      set({
+        partName: song.parts[i].name,
+        step: 0,
+        barInPart: 1,
+        barsInPart: song.parts[i].bars,
+        nextName: song.parts[(i + 1) % song.parts.length]?.name ?? "",
+      });
     },
 
     setBpm: (bpm) => {
       getEngine().seq.bpm = bpm;
-      set({ bpm, speed: 1, song: { ...get().song, bpm } });
+      set({ bpm, speed: 1, song: { ...get().song, bpm }, conductorOn: false });
+      getEngine().seq.conductor = false;
     },
 
     setVolume: (v) => {
@@ -300,7 +354,12 @@ export const useApp = create<{
       unlockAudio(ctx);
       ensureParts(get().song);
       seq.nextPart();
-      set({ partName: seq.currentPart?.name ?? "Intro", step: 0 });
+      set({
+        partName: seq.currentPart?.name ?? "Intro",
+        step: 0,
+        barInPart: 1,
+        barsInPart: seq.currentPart?.bars ?? 1,
+      });
     },
 
     restart: () => {
@@ -308,7 +367,12 @@ export const useApp = create<{
       unlockAudio(ctx);
       ensureParts(get().song);
       seq.restart();
-      set({ partName: seq.currentPart?.name ?? "Intro", step: 0 });
+      set({
+        partName: seq.currentPart?.name ?? "Intro",
+        step: 0,
+        barInPart: 1,
+        barsInPart: seq.currentPart?.bars ?? 1,
+      });
     },
 
     crash: () => {
@@ -329,7 +393,7 @@ export const useApp = create<{
       const { seq, ctx } = getEngine();
       unlockAudio(ctx);
       applyKitClick();
-      seq.onNext = (step, part) => set({ step, partName: part.name });
+      bindClock();
       if (!seq.playing) seq.start();
       set({ playing: true });
     },
