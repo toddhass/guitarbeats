@@ -57,7 +57,7 @@ export default function App() {
         {tab === "play" && (
           <div className="pane pane-play">
             <NowPlaying />
-            <CoachBar />
+            <CoachBar compact />
             <Transport mode="play" />
           </div>
         )}
@@ -72,7 +72,6 @@ export default function App() {
           <div className="pane pane-drums">
             <DrumPanel />
             <GroovePanel />
-            <CoachBar />
             <Transport mode="kits" />
           </div>
         )}
@@ -83,19 +82,21 @@ export default function App() {
           </div>
         )}
 
-        <StartDock />
-        <nav className="tabs tabs-4">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              className={tab === t.id ? "on" : ""}
-              onPointerDown={() => setTab(t.id)}
-            >
-              {t.label}
-            </button>
-          ))}
-        </nav>
+        <footer className="chrome">
+          <StartDock />
+          <nav className="tabs tabs-4">
+            {TABS.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                className={tab === t.id ? "on" : ""}
+                onPointerDown={() => setTab(t.id)}
+              >
+                {t.label}
+              </button>
+            ))}
+          </nav>
+        </footer>
       </div>
     </>
   );
