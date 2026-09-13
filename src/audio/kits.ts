@@ -2,10 +2,8 @@ export type Kit = "eighty" | "room" | "dry" | "linn" | "power" | "r8" | "stark";
 
 export const KITS: { id: Kit; label: string }[] = [
   { id: "eighty", label: "80s room" },
-  { id: "room", label: "80s room" },
   { id: "linn", label: "LinnDrum" },
   { id: "power", label: "Power 909" },
-  { id: "r8", label: "Power 909" },
   { id: "dry", label: "Dry Pearl" },
   { id: "stark", label: "TR-505" },
 ];
@@ -74,7 +72,16 @@ export const KIT_URLS: Record<Kit, Record<string, string>> = {
   stark: {
     kick: `${FIVE}/tr505-kick.wav`,
     snare: `${FIVE}/tr505-snare.wav`,
-    hat: `${FIVE}/tr505-kick.wav`,
+    hat: `${FIVE}/tr505-hihat-closed.wav`,
+    openHat: `${FIVE}/tr505-hihat-open.wav`,
+    crash: `${FIVE}/tr505-crash.wav`,
+    ride: `${FIVE}/tr505-ride.wav`,
+    tom: `${FIVE}/tr505-tom-m.wav`,
+    highTom: `${FIVE}/tr505-tom-h.wav`,
+    floor: `${FIVE}/tr505-tom-l.wav`,
+    cowbell: `${FIVE}/tr505-cowb-h.wav`,
+    rim: `${FIVE}/tr505-rim.wav`,
+    clap: `${FIVE}/tr505-clap.wav`,
   },
 };
 
