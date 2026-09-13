@@ -1,6 +1,9 @@
 import { Synth, DrumVoice } from "./synth";
 import { hit, Pattern, SongPart } from "../data/grooves";
 import { intensityForPart } from "../data/brain";
+import { hushCount, speakCount, warmCountVoice } from "./countVoice";
+
+const COUNT_WORDS = ["one", "two", "three", "four"] as const;
 
 export class Sequencer {
   private synth: Synth;
@@ -52,6 +55,13 @@ export class Sequencer {
     this.synth.stick(time, this.clickLevel, downbeat);
   }
 
+  private speakCountStep(step: number) {
+    if (step === 0) speakCount("a", this.bpm);
+    if (step % 4 === 0) speakCount(COUNT_WORDS[Math.floor(step / 4)] || "one", this.bpm);
+    else if (step % 4 === 2) speakCount("and", this.bpm);
+    else if (step % 4 === 3 && step < 12) speakCount("a", this.bpm);
+  }
+
   private scheduleStep(i: number, time: number, part: SongPart, useFill: boolean) {
     const pattern: Partial<Pattern> = useFill && part.fill ? part.fill : part.groove;
     const accent = (i === 0 ? 1.28 : i % 4 === 0 ? 1.08 : 1) * this.intensity;
@@ -82,6 +92,7 @@ export class Sequencer {
     if (this.countInLeft > 0) {
       const beat = Math.floor(this.step / 4) + 1;
       if (this.step % 4 === 0) this.synth.stick(time, 1, this.step === 0);
+      this.speakCountStep(this.step);
       this.emit({ id: "count", name: String(beat), bars: 1, swing: 0, groove: {}, fill: {} });
       this.countInLeft--;
       this.nextStepTime += this.stepDuration();
@@ -134,8 +145,18 @@ export class Sequencer {
     if (this.playing) this.timer = window.setTimeout(this.tick, 25);
   };
 
+  armCountIn() {
+    warmCountVoice();
+    hushCount();
+    this.countInLeft = 16;
+    this.step = 0;
+    this.barsPlayed = 0;
+    this.filling = false;
+  }
+
   start() {
     if (this.playing) return;
+    warmCountVoice();
     this.playing = true;
     this.nextStepTime = this.ctx.currentTime + 0.04;
     this.tick();
@@ -144,6 +165,7 @@ export class Sequencer {
   stop() {
     this.playing = false;
     this.filling = false;
+    hushCount();
     if (this.timer != null) {
       clearTimeout(this.timer);
       this.timer = null;
@@ -151,20 +173,18 @@ export class Sequencer {
   }
 
   restart() {
-    this.step = 0;
-    this.barsPlayed = 0;
     this.partIndex = 0;
     this.filling = false;
     this.intensity = intensityForPart(this.currentPart?.name ?? "");
+    this.armCountIn();
   }
 
   nextPart() {
     if (!this.parts.length) return;
     this.partIndex = (this.partIndex + 1) % this.parts.length;
-    this.step = 0;
-    this.barsPlayed = 0;
     this.filling = false;
     this.intensity = intensityForPart(this.currentPart?.name ?? "");
+    this.armCountIn();
   }
 
   queueFill() {
