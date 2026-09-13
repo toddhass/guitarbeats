@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { hit } from "../data/grooves";
 import type { Pattern, SongPart } from "../data/grooves";
 import { KIT_SRC } from "../assets/kitPhoto";
@@ -20,6 +21,17 @@ const PADS: { id: string; label: string; voices: string[]; style: React.CSSPrope
   { id: "kick", label: "Kick", voices: ["kick"], style: { left: "36%", top: "52%", width: "24%", height: "34%" } },
 ];
 
+function KitFallback() {
+  return (
+    <svg className="kit-svg" viewBox="0 0 640 400" xmlns="http://www.w3.org/2000/svg">
+      <rect width="640" height="400" fill="#f3f3f3" />
+      <text x="320" y="210" textAnchor="middle" fill="#888" fontSize="16">
+        Add public/kit.jpg — the white DW photo
+      </text>
+    </svg>
+  );
+}
+
 export function DrumSheet({
   part,
   step,
@@ -33,6 +45,7 @@ export function DrumSheet({
 }) {
   const pattern = part?.groove ?? {};
   const now = playing ? step % 16 : -1;
+  const [ok, setOk] = useState(true);
 
   return (
     <div className="diagram drum-sheet">
@@ -41,7 +54,16 @@ export function DrumSheet({
         <small>{feelLabel} · full kit</small>
       </p>
       <div className="kit-photo-wrap" role="img" aria-label="Full drum kit">
-        <img src={KIT_SRC} alt="Full drum kit" className="kit-photo" />
+        {ok ? (
+          <img
+            src={KIT_SRC}
+            alt="Full drum kit"
+            className="kit-photo"
+            onError={() => setOk(false)}
+          />
+        ) : (
+          <KitFallback />
+        )}
         {PADS.map((p) => {
           const lit = now >= 0 && on(pattern, p.voices, now);
           return (
@@ -61,7 +83,7 @@ export function DrumSheet({
           </span>
         ))}
       </div>
-      <p className="hint">Whole kit in frame. Glow marks the hit.</p>
+      <p className="hint">Drop the DW photo in the repo as public/kit.jpg</p>
     </div>
   );
 }
