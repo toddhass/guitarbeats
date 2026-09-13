@@ -2,9 +2,9 @@ import { create } from "zustand";
 import { Kit, Synth } from "../audio/synth";
 import { Sequencer } from "../audio/sequencer";
 import { createAudioContext, unlockAudio } from "../audio/unlock";
-import { searchAppleMusic, hitToSeed } from "../api";
+import { searchAppleMusic, hitToSeed, lookupTempo } from "../api";
 import { makeSong, Song, SEEDS } from "../data/songs";
-import { Feel, LABELS, STYLES } from "../data/grooves";
+import { Feel, LABELS, STYLES, feelFromGenre } from "../data/grooves";
 import { Tab } from "./tab-patch";
 
 interface Engine {
@@ -17,6 +17,7 @@ interface Engine {
 let engine: Engine | null = null;
 let searchTimer = 0;
 let lastToggle = 0;
+let lookupGen = 0;
 
 const seedLibrary = SEEDS.map(makeSong);
 const initialSong = seedLibrary[0];
@@ -117,6 +118,17 @@ export const useApp = create<{
     });
   }
 
+  async function resolveSong(song: Song): Promise<Song> {
+    const seeded = SEEDS.find((s) => s.id === song.id || (s.title.toLowerCase() === song.title.toLowerCase() && s.artist.toLowerCase() === song.artist.toLowerCase()));
+    if (seeded) return makeSong(seeded);
+    const gen = ++lookupGen;
+    const bpm = await lookupTempo(song.title, song.artist);
+    if (gen !== lookupGen) return song;
+    if (!bpm) return song;
+    const feel = feelFromGenre(song.genre, bpm);
+    return makeSong({ id: song.id, title: song.title, artist: song.artist, bpm, feel, genre: song.genre });
+  }
+
   return {
     tab: "play",
     playing: false,
@@ -173,7 +185,7 @@ export const useApp = create<{
       set({ library: local.length ? local : seedLibrary, searching: true });
       searchTimer = window.setTimeout(() => {
         void searchAppleMusic(t)
-          .then((hits) => {
+          .then(async (hits) => {
             if (get().query.trim() !== t) return;
             const base = local.length ? local : [];
             const seen = new Set(base.map((s) => (s.title + "|" + s.artist).toLowerCase()));
@@ -182,7 +194,18 @@ export const useApp = create<{
               .filter((s) => s.title && !seen.has((s.title + "|" + s.artist).toLowerCase()))
               .slice(0, 16)
               .map(makeSong);
-            set({ library: extra.length || base.length ? [...base, ...extra] : seedLibrary, searching: false });
+            const merged = extra.length || base.length ? [...base, ...extra] : seedLibrary;
+            set({ library: merged, searching: false });
+            const patched = await Promise.all(
+              merged.map(async (s) => {
+                if (!s.id.startsWith("it-")) return s;
+                const bpm = await lookupTempo(s.title, s.artist);
+                if (!bpm) return s;
+                return makeSong({ ...s, bpm, feel: feelFromGenre(s.genre, bpm) });
+              })
+            );
+            if (get().query.trim() !== t) return;
+            set({ library: patched });
           })
           .catch((err) => {
             console.warn("search failed", err);
@@ -196,7 +219,11 @@ export const useApp = create<{
         get().library.find((s) => s.id === id) ||
         (SEEDS.find((s) => s.id === id) ? makeSong(SEEDS.find((s) => s.id === id)!) : null);
       if (!song) return;
-      beginPlayback(song);
+      void resolveSong(song).then((ready) => {
+        const list = get().library.map((s) => (s.id === ready.id ? ready : s));
+        set({ library: list });
+        beginPlayback(ready);
+      });
     },
 
     selectFeel: (feel) => {
@@ -207,6 +234,7 @@ export const useApp = create<{
         artist: cur.id.startsWith("it-") ? cur.artist : (STYLES.find((s) => s.id === feel)?.label ?? feel),
         bpm: get().song.bpm,
         feel,
+        genre: cur.genre,
       });
       const { ctx, seq } = getEngine();
       unlockAudio(ctx);
