@@ -14,23 +14,21 @@ export interface SongBrain {
 }
 
 const BRAIN: Record<string, SongBrain> = {
-  "wagon-wheel": { capo: 0, key: "A mix via G shapes", strum: "train", kit: "room", hard: "Em", hint: "Train beat. G–D–Em–C the whole way.", chords: ["G", "D", "Em", "C"] },
-  "wonderwall": { capo: 2, key: "F#m shapes in Em", strum: "eighths", kit: "stark", hard: "Em", hint: "Capo 2. Em–G–D–C. Keep the eighths even.", chords: ["Em", "G", "D", "C"] },
-  "brown-eyed-girl": { capo: 0, key: "G", strum: "island", kit: "r8", hard: "C", hint: "Island lilt on G–C–G–D.", chords: ["G", "C", "G", "D"] },
+  "wagon-wheel": { capo: 0, key: "A mix via G shapes", strum: "train", kit: "eighty", hard: "Em", hint: "Train beat. G–D–Em–C the whole way.", chords: ["G", "D", "Em", "C"] },
+  "wonderwall": { capo: 2, key: "F#m shapes in Em", strum: "eighths", kit: "eighty", hard: "Em", hint: "Capo 2. Em–G–D–C. Keep the eighths even.", chords: ["Em", "G", "D", "C"] },
+  "brown-eyed-girl": { capo: 0, key: "G", strum: "island", kit: "linn", hard: "C", hint: "Island lilt on G–C–G–D.", chords: ["G", "C", "G", "D"] },
   "country-roads": { capo: 2, key: "A sounding", strum: "ballad", kit: "dry", hard: "Em", hint: "Capo 2. Slow G–Em–C–D. Do not rush the chorus.", chords: ["G", "Em", "C", "D"] },
-  "sweet-home-alabama": { capo: 0, key: "D", strum: "train", kit: "room", hard: "C", hint: "D–C–G shuffle. Lean the backbeat.", chords: ["D", "C", "G", "G"] },
+  "sweet-home-alabama": { capo: 0, key: "D", strum: "train", kit: "eighty", hard: "C", hint: "D–C–G shuffle. Lean the backbeat.", chords: ["D", "C", "G", "G"] },
   "wild-horses": { capo: 0, key: "G", strum: "ballad", kit: "dry", hard: "Am", hint: "Half time. Let the ride carry it.", chords: ["G", "Am", "G", "Am"] },
-  "dont-fear-the-reaper": { capo: 0, key: "A", strum: "eighths", kit: "stark", hard: "A", hint: "A–G cowbell. Stay on top of 141.", chords: ["A", "G", "A", "G"] },
+  "dont-fear-the-reaper": { capo: 0, key: "A", strum: "eighths", kit: "linn", hard: "A", hint: "A–G cowbell. Stay on top of 141.", chords: ["A", "G", "A", "G"] },
   "american-soldier": { capo: 0, key: "C", strum: "ballad", kit: "dry", hard: "F", hint: "C–G–Am–F. Loop F until the barre is quiet.", chords: ["C", "G", "Am", "F"] },
 };
 
 export function kitForFeel(feel: Feel): Kit {
-  if (feel === "country" || feel === "southern") return "room";
+  if (feel === "country" || feel === "southern" || feel === "rock" || feel === "pop") return "eighty";
   if (feel === "folk" || feel === "ballad") return "dry";
-  if (feel === "rock") return "stark";
-  if (feel === "pop") return "r8";
   if (feel === "hiphop") return "linn";
-  return "room";
+  return "eighty";
 }
 
 export function strumForFeel(feel: Feel): StrumId {
