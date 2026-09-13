@@ -5,7 +5,6 @@ import { brainFor } from "../data/brain";
 import { withCapo } from "../data/capo";
 import { STRUMS, StrumId } from "../data/strums";
 import { ChordDiagram } from "./ChordDiagram";
-import { Transport } from "./Transport";
 import { CoachBar } from "./CoachBar";
 
 const STRUM_KEY = "gb-strum";
@@ -74,9 +73,8 @@ export function PracticePanel() {
 
   return (
     <>
-      <CoachBar />
-      <section className="card practice">
-        <p className="kicker">Practice</p>
+      <section className="card">
+        <p className="kicker">Session</p>
         <p className="hint">{brain.hint}{partName ? ` · ${partName}` : ""}</p>
         <div className="chips">
           <button type="button" className={`chip${countIn ? " on" : ""}`} onClick={() => setCountIn(!countIn)}>Count-in</button>
@@ -88,7 +86,11 @@ export function PracticePanel() {
           <button type="button" className="chip" onClick={ladder}>Ladder</button>
         </div>
         {pathNote ? <p className="hint" style={{ marginTop: "0.6rem" }}>{pathNote}</p> : null}
-        <p className="label" style={{ marginTop: "0.85rem" }}>Capo · brain says {brain.capo || "open"}</p>
+      </section>
+      <CoachBar />
+      <section className="card practice">
+        <p className="kicker">Left hand</p>
+        <p className="label">Capo · brain says {brain.capo || "open"}</p>
         <div className="chips">
           {Array.from({ length: 8 }, (_, n) => (
             <button key={n} type="button" className={`chip${capo === n ? " on" : ""}`} onClick={() => setCapo(n)}>
@@ -104,7 +106,7 @@ export function PracticePanel() {
             </button>
           ))}
         </div>
-        <p className="label" style={{ marginTop: "0.85rem" }}>Paste a chart or Live Text from a photo</p>
+        <p className="label" style={{ marginTop: "0.85rem" }}>Paste a chart</p>
         <textarea
           value={sheet}
           onChange={(e) => setSheet(e.target.value)}
@@ -115,7 +117,7 @@ export function PracticePanel() {
         <div className="chips" style={{ marginTop: "0.45rem" }}>
           <button type="button" className="chip" onClick={applySheet}>Load chords</button>
         </div>
-        <p className="label" style={{ marginTop: "0.85rem" }}>Left hand — tap to hold and pause</p>
+        <p className="label" style={{ marginTop: "0.85rem" }}>Tap a chord to hold and pause</p>
         <div className="chords">
           {chords.map((c, i) => (
             <button
@@ -130,7 +132,6 @@ export function PracticePanel() {
         </div>
         <ChordDiagram chord={chords[active] ?? "G"} capo={capo} step={step} playing={playing} cells={strum.cells} />
       </section>
-      <Transport mode="play" />
     </>
   );
 }
