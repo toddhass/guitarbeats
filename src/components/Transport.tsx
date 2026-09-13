@@ -2,7 +2,7 @@ import { useApp } from "../state/store";
 import { STYLES } from "../data/grooves";
 import { KITS } from "../audio/kits";
 
-export function Transport({ mode = "play" }: { mode?: "play" | "kits" }) {
+export function Transport({ mode = "play" }: { mode?: "play" | "stage" | "kits" }) {
   const fill = useApp((s) => s.fill);
   const nextPart = useApp((s) => s.nextPart);
   const restart = useApp((s) => s.restart);
@@ -34,17 +34,23 @@ export function Transport({ mode = "play" }: { mode?: "play" | "kits" }) {
     };
   }
 
-  return (
-    <>
-      <div className="grid">
-        <button className="pedal fill" type="button" {...press(fill)}>Fill</button>
-        <button className="pedal next" type="button" {...press(nextPart)}>Next part</button>
-        <button className="pedal restart" type="button" {...press(restart)}>Restart</button>
-        <button className="pedal crash" type="button" {...press(crash)}>Crash</button>
-      </div>
-      {mode === "kits" ? (
-        <section className="card transport-groove">
-          <p className="label">Kit</p>
+  const pedals = (
+    <div className="grid">
+      <button className="pedal fill" type="button" {...press(fill)}>Fill</button>
+      <button className="pedal next" type="button" {...press(nextPart)}>Next part</button>
+      <button className="pedal restart" type="button" {...press(restart)}>Restart</button>
+      <button className="pedal crash" type="button" {...press(crash)}>Crash</button>
+    </div>
+  );
+
+  if (mode === "stage") return pedals;
+
+  if (mode === "kits") {
+    return (
+      <>
+        {pedals}
+        <section className="card">
+          <p className="kicker">Sound</p>
           <div className="chips">
             {KITS.map((k) => (
               <button key={k.id} type="button" className={`chip${kit === k.id ? " on" : ""}`} {...press(() => setKit(k.id))}>{k.label}</button>
@@ -57,35 +63,40 @@ export function Transport({ mode = "play" }: { mode?: "play" | "kits" }) {
               <input type="range" min={0} max={100} value={clickLevel} onChange={(e) => setClickLevel(Number(e.target.value))} />
               <span>{clickLevel}</span>
             </label>
-          </div>
-        </section>
-      ) : (
-        <section className="card transport-groove">
-          <p className="label">Conductor</p>
-          <div className="chips">
-            <button type="button" className={`chip${conductorOn ? " on" : ""}`} {...press(() => setConductorOn(!conductorOn))}>Conductor</button>
-            <button type="button" className={`chip${countIn ? " on" : ""}`} {...press(() => setCountIn(!countIn))}>Count</button>
-          </div>
-          <div className="sliders" style={{ marginTop: "0.85rem" }}>
-            <label className="sl">
-              Tempo
-              <input type="range" min={40} max={240} value={bpm} onChange={(e) => setBpm(Number(e.target.value))} />
-              <span>{bpm}</span>
-            </label>
             <label className="sl">
               Volume
               <input type="range" min={0} max={100} value={volume} onChange={(e) => setVolume(Number(e.target.value))} />
               <span>{volume}</span>
             </label>
           </div>
-          <p className="label" style={{ marginTop: "0.85rem" }}>Feel</p>
-          <div className="chips">
-            {STYLES.map((s) => (
-              <button key={s.id} type="button" className={`chip${song.feel === s.id ? " on" : ""}`} {...press(() => selectFeel(s.id))}>{s.label}</button>
-            ))}
-          </div>
         </section>
-      )}
+      </>
+    );
+  }
+
+  return (
+    <>
+      {pedals}
+      <section className="card">
+        <p className="kicker">Conductor</p>
+        <div className="chips">
+          <button type="button" className={`chip${conductorOn ? " on" : ""}`} {...press(() => setConductorOn(!conductorOn))}>Conductor</button>
+          <button type="button" className={`chip${countIn ? " on" : ""}`} {...press(() => setCountIn(!countIn))}>Count</button>
+        </div>
+        <div className="sliders" style={{ marginTop: "0.85rem" }}>
+          <label className="sl">
+            Tempo
+            <input type="range" min={40} max={240} value={bpm} onChange={(e) => setBpm(Number(e.target.value))} />
+            <span>{bpm}</span>
+          </label>
+        </div>
+        <p className="label" style={{ marginTop: "0.85rem" }}>Feel</p>
+        <div className="chips">
+          {STYLES.map((s) => (
+            <button key={s.id} type="button" className={`chip${song.feel === s.id ? " on" : ""}`} {...press(() => selectFeel(s.id))}>{s.label}</button>
+          ))}
+        </div>
+      </section>
     </>
   );
 }
