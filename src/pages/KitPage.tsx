@@ -8,7 +8,7 @@ export function KitPage() {
       <div className="page-head kit-head">
         <p className="page-kicker">Floor</p>
         <h1>Kit</h1>
-        <p className="page-lead">Sound and click. Song form lives on Stage.</p>
+        <p className="page-lead">How the drums sound. Form and start live on Play.</p>
       </div>
       <DrumPanel />
       <GroovePanel />
