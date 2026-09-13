@@ -1,24 +1,16 @@
 import { useEffect, useState } from "react";
 import { useApp } from "./state/store";
-import { NowPlaying } from "./components/NowPlaying";
-import { Transport } from "./components/Transport";
-import { PracticePanel } from "./components/PracticePanel";
-import { DrumPanel } from "./components/DrumPanel";
-import { Library } from "./components/Library";
-import { GroovePanel } from "./components/GroovePanel";
 import { Splash } from "./components/Splash";
-import { CoachBar } from "./components/CoachBar";
 import { StartDock } from "./components/StartDock";
+import { NowStrip } from "./components/NowStrip";
+import { PlayPage } from "./pages/PlayPage";
+import { PracticePage } from "./pages/PracticePage";
+import { KitPage } from "./pages/KitPage";
+import { LibraryPage } from "./pages/LibraryPage";
 import { bindRemote, syncMediaSession } from "./remote";
 import { useWakeLock } from "./hooks/useWakeLock";
+import { PAGES, tabFromHash, writeHash } from "./state/routes";
 import type { Tab } from "./state/tab-patch";
-
-const TABS: { id: Tab; label: string }[] = [
-  { id: "play", label: "Play" },
-  { id: "practice", label: "Practice" },
-  { id: "drums", label: "Drums" },
-  { id: "songs", label: "Songs" },
-];
 
 export default function App() {
   const tab = useApp((s) => s.tab);
@@ -27,12 +19,23 @@ export default function App() {
   const song = useApp((s) => s.song);
   const bpm = useApp((s) => s.bpm);
   const [splash, setSplash] = useState(true);
+  const page = PAGES.find((p) => p.id === tab) ?? PAGES[0];
 
   useWakeLock(playing);
 
   useEffect(() => {
+    const fromUrl = tabFromHash();
+    if (fromUrl !== tab) setTab(fromUrl);
+    const onHash = () => setTab(tabFromHash());
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+
+  useEffect(() => {
+    writeHash(tab);
     document.body.className = `pane-${tab}`;
-  }, [tab]);
+    document.title = `${page.title} · GuitarBeats`;
+  }, [tab, page.title]);
 
   useEffect(() => {
     bindRemote();
@@ -42,55 +45,39 @@ export default function App() {
     syncMediaSession();
   }, [playing, song, bpm]);
 
+  function go(id: Tab) {
+    writeHash(id);
+    setTab(id);
+  }
+
   return (
     <>
       {splash && <Splash onDone={() => setSplash(false)} />}
-      <div className={`wrap pane-${tab}`}>
+      <div className={`wrap page-${tab}`}>
         <header>
           <div className="brand">
-            GuitarBeats
-            <small>Play along. Stay in the pocket.</small>
+            {page.title}
+            <small>GuitarBeats</small>
           </div>
           <span className={`badge${playing ? " on" : ""}`}>{playing ? "Playing" : "Ready"}</span>
         </header>
 
-        {tab === "play" && (
-          <div className="pane pane-play">
-            <NowPlaying />
-            <CoachBar compact />
-            <Transport mode="play" />
-          </div>
-        )}
+        {tab !== "play" && <NowStrip />}
 
-        {tab === "practice" && (
-          <div className="pane pane-practice">
-            <PracticePanel />
-          </div>
-        )}
+        {tab === "play" && <PlayPage />}
+        {tab === "practice" && <PracticePage />}
+        {tab === "drums" && <KitPage />}
+        {tab === "songs" && <LibraryPage />}
 
-        {tab === "drums" && (
-          <div className="pane pane-drums">
-            <DrumPanel />
-            <GroovePanel />
-            <Transport mode="kits" />
-          </div>
-        )}
-
-        {tab === "songs" && (
-          <div className="pane pane-songs">
-            <Library />
-          </div>
-        )}
-
-        <footer className="chrome">
-          <StartDock />
+        <footer className={`chrome${tab === "play" ? " with-start" : ""}`}>
+          {tab === "play" && <StartDock />}
           <nav className="tabs tabs-4">
-            {TABS.map((t) => (
+            {PAGES.map((t) => (
               <button
                 key={t.id}
                 type="button"
                 className={tab === t.id ? "on" : ""}
-                onPointerDown={() => setTab(t.id)}
+                onPointerDown={() => go(t.id)}
               >
                 {t.label}
               </button>
