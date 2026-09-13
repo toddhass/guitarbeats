@@ -9,13 +9,13 @@ function on(pattern: Partial<Pattern>, voices: string[], step: number) {
 }
 
 const PADS: { id: string; label: string; voices: string[]; style: React.CSSProperties }[] = [
-  { id: "hat", label: "Hats", voices: ["hat", "openHat"], style: { left: "2%", top: "8%", width: "18%", height: "28%" } },
-  { id: "crash", label: "Crash", voices: ["crash"], style: { left: "22%", top: "0%", width: "22%", height: "22%" } },
-  { id: "ride", label: "Ride", voices: ["ride", "cowbell"], style: { left: "70%", top: "4%", width: "26%", height: "24%" } },
-  { id: "rack", label: "Toms", voices: ["tom", "highTom"], style: { left: "32%", top: "22%", width: "34%", height: "24%" } },
-  { id: "snare", label: "Snare", voices: ["snare", "rim", "clap"], style: { left: "12%", top: "42%", width: "22%", height: "22%" } },
-  { id: "floor", label: "Floor", voices: ["floor"], style: { left: "68%", top: "42%", width: "24%", height: "32%" } },
-  { id: "kick", label: "Kick", voices: ["kick"], style: { left: "36%", top: "48%", width: "28%", height: "42%" } },
+  { id: "hat", label: "Hats", voices: ["hat", "openHat"], style: { left: "4%", top: "18%", width: "16%", height: "24%" } },
+  { id: "crash", label: "Crash", voices: ["crash"], style: { left: "22%", top: "2%", width: "20%", height: "20%" } },
+  { id: "ride", label: "Ride", voices: ["ride", "cowbell"], style: { left: "70%", top: "6%", width: "24%", height: "22%" } },
+  { id: "rack", label: "Toms", voices: ["tom", "highTom"], style: { left: "34%", top: "16%", width: "32%", height: "24%" } },
+  { id: "snare", label: "Snare", voices: ["snare", "rim", "clap"], style: { left: "16%", top: "42%", width: "20%", height: "22%" } },
+  { id: "floor", label: "Floor", voices: ["floor"], style: { left: "68%", top: "44%", width: "22%", height: "28%" } },
+  { id: "kick", label: "Kick", voices: ["kick"], style: { left: "36%", top: "46%", width: "28%", height: "38%" } },
 ];
 
 export function DrumSheet({
@@ -36,13 +36,17 @@ export function DrumSheet({
     <div className="diagram drum-sheet">
       <p className="diagram-name">
         {part?.name ?? "Groove"}
-        <small>{feelLabel} · real kit · glow = hit</small>
+        <small>{feelLabel} · full kit</small>
       </p>
-      <div className="kit-photo-wrap" role="img" aria-label="Drum kit">
+      <div className="kit-photo-wrap" role="img" aria-label="Full drum kit">
         <img
-          src="https://images.unsplash.com/photo-1519892300165-cb5542fb47c7?auto=format&fit=crop&w=1400&q=80"
-          alt="Drum kit"
+          src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Pearl_Export_Series.jpg/1280px-Pearl_Export_Series.jpg?v=fullkit"
+          alt="Full drum kit"
           className="kit-photo"
+          onError={(e) => {
+            e.currentTarget.src =
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Drum_kit_overview.JPG/1280px-Drum_kit_overview.JPG";
+          }}
         />
         {PADS.map((p) => {
           const lit = now >= 0 && on(pattern, p.voices, now);
@@ -63,7 +67,7 @@ export function DrumSheet({
           </span>
         ))}
       </div>
-      <p className="hint">Front kit photo. Pads light when that piece plays.</p>
+      <p className="hint">Entire kit in frame. Glow marks the hit.</p>
     </div>
   );
 }
