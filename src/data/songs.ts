@@ -1,7 +1,7 @@
 import { DEF, Feel, feelFromGenre, partsFor, SongPart } from "./grooves";
 import { chartFor, partsFromChart } from "./arrangements";
 
-export interface SongSeed { id: string; title: string; artist: string; bpm: number; feel: Feel; genre?: string; }
+export interface SongSeed { id: string; title: string; artist: string; bpm: number; feel: Feel; genre?: string; ms?: number; }
 export interface Song {
   id: string;
   title: string;
@@ -12,6 +12,7 @@ export interface Song {
   genre?: string;
   chartSource?: "chart" | "template";
   songBpm: number;
+  ms?: number;
 }
 
 export const SEEDS: SongSeed[] = [
@@ -91,7 +92,7 @@ export function loadUserSeeds(): SongSeed[] {
   }
 }
 
-export function rememberUserSeed(seed: { id: string; title: string; artist: string; bpm: number; feel: Feel; genre?: string }) {
+export function rememberUserSeed(seed: { id: string; title: string; artist: string; bpm: number; feel: Feel; genre?: string; ms?: number }) {
   if (SEEDS.some((s) => s.id === seed.id)) return;
   const list = loadUserSeeds().filter(
     (s) => s.id !== seed.id && !(normName(s.title) === normName(seed.title) && normName(s.artist) === normName(seed.artist)),
@@ -103,13 +104,14 @@ export function rememberUserSeed(seed: { id: string; title: string; artist: stri
     bpm: seed.bpm,
     feel: seed.feel,
     genre: seed.genre,
+    ms: seed.ms,
   });
   try {
     localStorage.setItem(USER_KEY, JSON.stringify(list.slice(0, 40)));
   } catch { /* quota */ }
 }
 
-export function makeSong(seed: { id: string; title: string; artist: string; bpm?: number; feel?: Feel; genre?: string }): Song {
+export function makeSong(seed: { id: string; title: string; artist: string; bpm?: number; feel?: Feel; genre?: string; ms?: number }): Song {
   const known = matchSeed(seed.title, seed.artist, seed.id);
   const id = seed.id;
   const title = seed.title;
@@ -128,8 +130,10 @@ export function makeSong(seed: { id: string; title: string; artist: string; bpm?
   if (id === "dont-fear-the-reaper" || /reaper/i.test(title || "")) {
     bpm = Math.round(seed.bpm && seed.bpm > 40 ? Math.min(seed.bpm, 148) : 141);
   }
+  if (/thriller/i.test(title || "")) bpm = 118;
   if (known?.bpm && known.bpm >= 40 && (!seed.bpm || seed.bpm < 40)) bpm = known.bpm;
-  const chart = chartFor(known?.id || id, title, artist, feel);
+  const ms = seed.ms || known?.ms;
+  const chart = chartFor(known?.id || id, title, artist, feel, bpm, ms);
   if (chart.bpm && chart.source === "chart") bpm = chart.bpm;
   let parts = partsFromChart(feel, chart);
   if (!parts.length) parts = partsFor(feel);
@@ -144,5 +148,6 @@ export function makeSong(seed: { id: string; title: string; artist: string; bpm?
     parts,
     genre: seed.genre,
     chartSource: chart.source,
+    ms,
   };
 }
