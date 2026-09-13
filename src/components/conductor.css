@@ -9,3 +9,7 @@
   font-size: .82rem;
   line-height: 1.35;
 }
+.card.coach .hint { margin-bottom: .55rem; }
+.timing-locked { color: #7dcea0; }
+.timing-early { color: #f0b429; }
+.timing-late { color: #e07a5f; }
