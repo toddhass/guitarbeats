@@ -9,11 +9,23 @@ export interface AppleHit {
 }
 
 export async function searchAppleMusic(term: string): Promise<AppleHit[]> {
-  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=song&limit=20`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`search failed (${res.status})`);
-  const data = await res.json();
-  return (data.results ?? []) as AppleHit[];
+  const qs = encodeURIComponent(term);
+  const urls = [
+    `/api/search?term=${qs}`,
+    `https://itunes.apple.com/search?term=${qs}&entity=song&limit=20`,
+  ];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      const data = await res.json();
+      const results = (data.results ?? []) as AppleHit[];
+      if (results.length || url.startsWith("/api")) return results;
+    } catch {
+      /* try next source */
+    }
+  }
+  return [];
 }
 
 export function hitToSeed(t: AppleHit) {
