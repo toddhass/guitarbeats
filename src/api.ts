@@ -6,6 +6,7 @@ export interface AppleHit {
   trackName: string;
   artistName: string;
   primaryGenreName?: string;
+  trackTimeMillis?: number;
 }
 
 export async function searchAppleMusic(term: string): Promise<AppleHit[]> {
@@ -40,6 +41,7 @@ export function hitToSeed(t: AppleHit) {
     bpm: known ?? 0,
     feel: feelFromGenre(t.primaryGenreName, known ?? 0) as Feel,
     genre: t.primaryGenreName,
+    ms: t.trackTimeMillis && t.trackTimeMillis > 25000 ? t.trackTimeMillis : undefined,
   };
 }
 
