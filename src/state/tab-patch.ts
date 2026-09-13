@@ -1,1 +1,1 @@
-export type Tab = "play" | "practice" | "drums" | "songs";
+export type { Tab } from "./routes";
