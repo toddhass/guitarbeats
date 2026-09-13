@@ -66,6 +66,7 @@ export const useApp = create<{
   setQuery: (q: string) => void;
   selectSong: (id: string) => void;
   selectFeel: (feel: Feel) => void;
+  selectPart: (id: string) => void;
   setBpm: (n: number) => void;
   setVolume: (n: number) => void;
   setLoopPart: (v: boolean) => void;
@@ -241,6 +242,18 @@ export const useApp = create<{
       seq.setParts(song.parts, true);
       seq.bpm = Math.max(40, Math.round(song.bpm * get().speed));
       set({ song, partName: song.parts[0]?.name ?? "Intro" });
+    },
+
+    selectPart: (id) => {
+      const song = get().song;
+      const i = song.parts.findIndex((p) => p.id === id);
+      if (i < 0) return;
+      const { seq, ctx } = getEngine();
+      unlockAudio(ctx);
+      ensureParts(song);
+      seq.partIndex = i;
+      seq.step = 0;
+      set({ partName: song.parts[i].name, step: 0 });
     },
 
     setBpm: (bpm) => {
