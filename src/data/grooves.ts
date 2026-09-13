@@ -32,13 +32,19 @@ export function partsFor(feel: Feel): SongPart[] {
 }
 export function feelFromGenre(genre: string | undefined, bpm: number | undefined): Feel {
   const g = (genre || "").toLowerCase();
+  const n = bpm && bpm > 0 ? bpm : 0;
   if (/hip.?hop|rap|trap/.test(g)) return "hiphop";
-  if (/country|americana|bluegrass/.test(g)) return "country";
-  if (/folk|acoustic|singer/.test(g)) return "folk";
+  if (n && n < 76) return /country|americana|folk|acoustic/.test(g) ? "folk" : "ballad";
+  if (/country|americana|bluegrass/.test(g)) {
+    if (n && n < 100) return "folk";
+    if (n && n > 138) return "country";
+    return n && n < 118 ? "southern" : "country";
+  }
+  if (/folk|acoustic|singer/.test(g)) return n && n < 80 ? "ballad" : "folk";
   if (/southern/.test(g)) return "southern";
-  if (/ballad|blues|soul|jazz/.test(g)) return "ballad";
+  if (/ballad|blues|soul|jazz/.test(g)) return n && n > 110 ? "rock" : "ballad";
   if (/pop|dance|disco|funk/.test(g)) return "pop";
-  if (bpm && bpm < 80) return "ballad";
+  if (n && n < 80) return "ballad";
   return "rock";
 }
 export function hit(track: string | undefined, step: number): number {
