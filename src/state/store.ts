@@ -136,7 +136,8 @@ export const useApp = create<{
     seq.setParts(song.parts, true);
     seq.loopPart = get().loopPart;
     const count = get().countIn || get().conductorOn;
-    seq.countInLeft = count ? 16 : 0;
+    if (count) seq.armCountIn();
+    else seq.countInLeft = 0;
     const sourceBpm = get().conductorOn ? song.songBpm || song.bpm : song.bpm;
     const bpm = Math.max(40, Math.round(sourceBpm * get().speed));
     seq.bpm = bpm;
@@ -331,8 +332,11 @@ export const useApp = create<{
       unlockAudio(ctx);
       ensureParts(song);
       seq.partIndex = i;
-      seq.step = 0;
-      seq.barsPlayed = 0;
+      if (get().playing) seq.armCountIn();
+      else {
+        seq.step = 0;
+        seq.barsPlayed = 0;
+      }
       set({
         partName: song.parts[i].name,
         step: 0,
@@ -386,7 +390,7 @@ export const useApp = create<{
       ensureParts(get().song);
       seq.nextPart();
       set({
-        partName: seq.currentPart?.name ?? "Intro",
+        partName: "1",
         step: 0,
         barInPart: 1,
         barsInPart: seq.currentPart?.bars ?? 1,
@@ -399,11 +403,12 @@ export const useApp = create<{
       ensureParts(get().song);
       seq.restart();
       set({
-        partName: seq.currentPart?.name ?? "Intro",
+        partName: "1",
         step: 0,
         barInPart: 1,
         barsInPart: seq.currentPart?.bars ?? 1,
       });
+      if (!get().playing) beginPlayback(get().song);
     },
 
     crash: () => {
