@@ -6,6 +6,7 @@ import { searchAppleMusic, hitToSeed, lookupTempo } from "../api";
 import { makeSong, Song, SEEDS } from "../data/songs";
 import { Feel, LABELS, STYLES, feelFromGenre } from "../data/grooves";
 import { Tab } from "./tab-patch";
+import { brainFor } from "../data/brain";
 
 interface Engine {
   ctx: AudioContext;
@@ -22,10 +23,18 @@ let lookupGen = 0;
 const seedLibrary = SEEDS.map(makeSong);
 const initialSong = seedLibrary[0];
 
+function bindCtx(ctx: AudioContext) {
+  (window as unknown as { __gbCtx?: AudioContext }).__gbCtx = ctx;
+}
+
 function getEngine(): Engine {
-  if (engine) return engine;
+  if (engine) {
+    bindCtx(engine.ctx);
+    return engine;
+  }
   const ctx = createAudioContext();
   unlockAudio(ctx);
+  bindCtx(ctx);
   const masterGain = ctx.createGain();
   masterGain.gain.value = 1;
   masterGain.connect(ctx.destination);
@@ -36,6 +45,10 @@ function getEngine(): Engine {
   seq.conductor = true;
   engine = { ctx, synth, seq, masterGain };
   return engine;
+}
+
+export function ensureEngine(): Engine {
+  return getEngine();
 }
 
 function ensureParts(song: Song) {
@@ -262,7 +275,9 @@ export const useApp = create<{
       if (!song) return;
       void resolveSong(song).then((ready) => {
         const list = get().library.map((s) => (s.id === ready.id ? ready : s));
-        set({ library: list, tab: "play", conductorOn: true });
+        const brain = brainFor(ready.id, ready.feel, ready.title);
+        getEngine().synth.kit = brain.kit;
+        set({ library: list, tab: "play", conductorOn: true, kit: brain.kit });
         getEngine().seq.conductor = true;
         beginPlayback(ready);
       });
