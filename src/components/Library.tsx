@@ -20,26 +20,10 @@ export function Library() {
   return (
     <>
       <div className="card library">
-        <p className="kicker">Set list</p>
-        <p className="hint">Build tonight’s order. Coach → Next in set walks it.</p>
-        {setSongs.length === 0 && <p className="empty">No songs in the set yet</p>}
-        <div className="list">
-          {setSongs.map((s, i) => (
-            <button key={s.id} type="button" className={`row${song.id === s.id ? " active" : ""}`} onClick={() => playSetItem(s.id)}>
-              <span>
-                <span className="t">{i + 1}. {s.title}</span>
-                <span className="a">{s.artist} · {s.bpm || "?"} BPM</span>
-              </span>
-              <span className="bpm" onPointerDown={(e) => { e.stopPropagation(); removeSet(s.id); }}>✕</span>
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="card library">
-        <p className="kicker">Library</p>
+        <p className="kicker">Search</p>
         <input
           type="search"
-          placeholder="Search a song"
+          placeholder="Song or artist"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           autoCapitalize="off"
@@ -59,6 +43,21 @@ export function Library() {
               </button>
               <button type="button" className={`chip${setlist.includes(s.id) ? " on" : ""}`} onClick={() => addSet(s.id)}>+</button>
             </div>
+          ))}
+        </div>
+      </div>
+      <div className="card library">
+        <p className="kicker">Set list</p>
+        {setSongs.length === 0 && <p className="empty">Tap + on a song to add it</p>}
+        <div className="list">
+          {setSongs.map((s, i) => (
+            <button key={s.id} type="button" className={`row${song.id === s.id ? " active" : ""}`} onClick={() => playSetItem(s.id)}>
+              <span>
+                <span className="t">{i + 1}. {s.title}</span>
+                <span className="a">{s.artist} · {s.bpm || "?"} BPM</span>
+              </span>
+              <span className="bpm" onPointerDown={(e) => { e.stopPropagation(); removeSet(s.id); }}>✕</span>
+            </button>
           ))}
         </div>
       </div>
