@@ -1,7 +1,7 @@
 export type Kit = "eighty" | "room" | "dry" | "linn" | "power" | "r8" | "stark";
 
 export const KITS: { id: Kit; label: string }[] = [
-  { id: "eighty", label: "80s room" },
+  { id: "eighty", label: "Ludwig 80s" },
   { id: "linn", label: "LinnDrum" },
   { id: "power", label: "Power 909" },
   { id: "dry", label: "Dry Pearl" },
@@ -14,28 +14,38 @@ const LM2 = `${ORA}/DM/LM-2/samples`;
 const NINE = `${ORA}/DM/TR-909/Detroit/samples`;
 const FIVE = `${ORA}/DM/TR-505/samples`;
 
-const pearl = {
-  kick: `${AVL}/36-Pearl22Kick-4.wav`,
+const ludwig = {
+  kick: `${AVL}/36-Ludwig26Kick-4.wav`,
   snare: `${AVL}/38-PearlSnare-4.wav`,
   hat: `${AVL}/42-SabianRockHatClosed-4.wav`,
   openHat: `${AVL}/46-SabianRockHatSemiOpen-4.wav`,
   pedalHat: `${AVL}/44-SabianRockHatPedal-3.wav`,
   crash: `${AVL}/49-SabianAA16Crash-3.wav`,
   ride: `${AVL}/51-SabianAAX20Ride-3.wav`,
-  tom: `${AVL}/45-Pearl12Tom-4.wav`,
-  highTom: `${AVL}/47-Pearl13Tom2-3.wav`,
-  floor: `${AVL}/41-Pearl16FloorTom-4.wav`,
+  tom: `${AVL}/45-Ludwig14Tom-4.wav`,
+  highTom: `${AVL}/47-Ludwig14TomEdge-3.wav`,
+  floor: `${AVL}/41-Ludwig16FloorTom-4.wav`,
   rim: `${AVL}/40-PearlSnareEdge-4.wav`,
 };
 
+const pearl = {
+  kick: `${AVL}/36-Pearl22Kick-4.wav`,
+  snare: `${AVL}/38-PearlSnare-2.wav`,
+  hat: `${AVL}/42-SabianRockHatClosed-3.wav`,
+  openHat: `${AVL}/46-SabianRockHatSemiOpen-3.wav`,
+  pedalHat: `${AVL}/44-SabianRockHatPedal-3.wav`,
+  crash: `${AVL}/49-SabianAA16Crash-3.wav`,
+  ride: `${AVL}/51-SabianAAX20Ride-3.wav`,
+  tom: `${AVL}/45-Pearl12Tom-3.wav`,
+  highTom: `${AVL}/47-Pearl13Tom2-3.wav`,
+  floor: `${AVL}/41-Pearl16FloorTom-3.wav`,
+  rim: `${AVL}/40-PearlSnareEdge-3.wav`,
+};
+
 export const KIT_URLS: Record<Kit, Record<string, string>> = {
-  eighty: pearl,
-  room: pearl,
-  dry: {
-    ...pearl,
-    snare: `${AVL}/38-PearlSnare-2.wav`,
-    kick: `${AVL}/36-Pearl22Kick-2.wav`,
-  },
+  eighty: ludwig,
+  room: ludwig,
+  dry: pearl,
   linn: {
     kick: `${LM2}/kick.wav`,
     snare: `${LM2}/snare-m.wav`,
