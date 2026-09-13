@@ -6,7 +6,7 @@ export function PracticePage() {
       <div className="page-head workshop-head">
         <p className="page-kicker">Workshop</p>
         <h1>Practice</h1>
-        <p className="page-lead">Loop, slow, and lock timing. Play stays on Stage.</p>
+        <p className="page-lead">Chords, capo, loop, and speed. Drums stay on Stage and Kit.</p>
       </div>
       <PracticePanel />
     </div>
