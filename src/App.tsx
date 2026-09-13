@@ -48,20 +48,13 @@ export default function App() {
   function go(id: Tab) {
     writeHash(id);
     setTab(id);
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   }
 
   return (
     <>
       {splash && <Splash onDone={() => setSplash(false)} />}
       <div className={`wrap page-${tab}`}>
-        <header>
-          <div className="brand">
-            {page.title}
-            <small>GuitarBeats</small>
-          </div>
-          <span className={`badge${playing ? " on" : ""}`}>{playing ? "Playing" : "Ready"}</span>
-        </header>
-
         {tab !== "play" && <NowStrip />}
 
         {tab === "play" && <PlayPage />}
