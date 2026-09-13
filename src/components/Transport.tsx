@@ -3,8 +3,6 @@ import { STYLES } from "../data/grooves";
 import { KITS } from "../audio/kits";
 
 export function Transport({ mode = "play" }: { mode?: "play" | "kits" }) {
-  const playing = useApp((s) => s.playing);
-  const toggleStart = useApp((s) => s.toggleStart);
   const fill = useApp((s) => s.fill);
   const nextPart = useApp((s) => s.nextPart);
   const restart = useApp((s) => s.restart);
@@ -34,9 +32,6 @@ export function Transport({ mode = "play" }: { mode?: "play" | "kits" }) {
 
   return (
     <>
-      <button className={`start${playing ? " stop" : ""}`} type="button" {...press(toggleStart)}>
-        {playing ? "Stop" : "Start"}
-      </button>
       <div className="grid">
         <button className="pedal fill" type="button" {...press(fill)}>Fill</button>
         <button className="pedal next" type="button" {...press(nextPart)}>Next part</button>

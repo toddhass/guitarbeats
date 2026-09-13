@@ -8,6 +8,7 @@ import { Library } from "./components/Library";
 import { GroovePanel } from "./components/GroovePanel";
 import { Splash } from "./components/Splash";
 import { CoachBar } from "./components/CoachBar";
+import { StartDock } from "./components/StartDock";
 import { bindRemote, syncMediaSession } from "./remote";
 import { useWakeLock } from "./hooks/useWakeLock";
 import type { Tab } from "./state/tab-patch";
@@ -82,6 +83,7 @@ export default function App() {
           </div>
         )}
 
+        <StartDock />
         <nav className="tabs tabs-4">
           {TABS.map((t) => (
             <button
