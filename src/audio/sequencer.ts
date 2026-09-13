@@ -80,8 +80,9 @@ export class Sequencer {
     const time = this.nextStepTime + (this.step % 2 === 1 && this.currentPart ? this.currentPart.swing * this.stepDuration() : 0);
 
     if (this.countInLeft > 0) {
-      if (this.step % 4 === 0) this.click(time, this.step === 0);
-      this.emit(this.currentPart ?? { id: "count", name: "Count-in", bars: 1, swing: 0, groove: {}, fill: {} });
+      const beat = Math.floor(this.step / 4) + 1;
+      if (this.step % 4 === 0) this.synth.stick(time, 1, this.step === 0);
+      this.emit({ id: "count", name: String(beat), bars: 1, swing: 0, groove: {}, fill: {} });
       this.countInLeft--;
       this.nextStepTime += this.stepDuration();
       this.step++;

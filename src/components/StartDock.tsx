@@ -5,11 +5,13 @@ export function StartDock() {
   const toggleStart = useApp((s) => s.toggleStart);
   const song = useApp((s) => s.song);
   const bpm = useApp((s) => s.bpm);
+  const partName = useApp((s) => s.partName);
+  const counting = playing && /^[1-4]$/.test(partName);
 
   return (
     <div className="dock">
       <p className="dock-meta">
-        {song.title} · {bpm} BPM
+        {counting ? `Count ${partName} — come in on 1` : `${song.title} · ${bpm} BPM`}
       </p>
       <button
         className={`start${playing ? " stop" : ""}`}
@@ -20,7 +22,7 @@ export function StartDock() {
           toggleStart();
         }}
       >
-        {playing ? "Stop" : "Start"}
+        {counting ? partName : playing ? "Stop" : "Start"}
       </button>
     </div>
   );
