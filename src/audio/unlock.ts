@@ -1,5 +1,3 @@
-import { warmCountVoice } from "./countVoice";
-
 const SILENT_WAV =
   "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
 
@@ -16,7 +14,6 @@ export function createAudioContext(): AudioContext {
 
 export function unlockAudio(ctx?: AudioContext | null) {
   if (ctx && ctx.state === "suspended") void ctx.resume();
-  warmCountVoice();
   if (!htmlAudio) {
     htmlAudio = new Audio(SILENT_WAV);
     htmlAudio.loop = true;
