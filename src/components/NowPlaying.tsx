@@ -12,32 +12,21 @@ export function NowPlaying() {
   const barInPart = useApp((s) => s.barInPart);
   const barsInPart = useApp((s) => s.barsInPart);
   const nextName = useApp((s) => s.nextName);
-  const setConductorOn = useApp((s) => s.setConductorOn);
 
   return (
     <section className="card now">
-      <p className="kicker">Now playing</p>
+      <p className="kicker">Now</p>
       <h2>{song.title}</h2>
       <p className="who">{song.artist}</p>
       <dl className="meta">
-        <div><dt>Groove</dt><dd>{LABELS[song.feel]}</dd></div>
         <div><dt>Part</dt><dd>{partName || "Intro"}</dd></div>
-        <div><dt>Tempo</dt><dd>{bpm}{conductorOn ? " lock" : ""}</dd></div>
+        <div><dt>Bar</dt><dd>{barInPart || 1}/{barsInPart || 1}</dd></div>
+        <div><dt>Tempo</dt><dd>{bpm}{conductorOn ? "" : ""}</dd></div>
       </dl>
-      <div className="conductor">
-        <button
-          type="button"
-          className={`chip${conductorOn ? " on" : ""}`}
-          onPointerDown={() => setConductorOn(!conductorOn)}
-        >
-          {conductorOn ? "Conductor on" : "Conductor off"}
-        </button>
-        <span className="conductor-meta">
-          {conductorOn
-            ? `${song.chartSource === "chart" ? "Song form" : "Form template"} · bar ${barInPart || 1}/${barsInPart || 1}${nextName ? ` · next ${nextName}` : ""}`
-            : "Free groove — tempo and form are yours"}
-        </span>
-      </div>
+      <p className="conductor-meta">
+        {LABELS[song.feel]}
+        {nextName ? ` · next ${nextName}` : ""}
+      </p>
       <div className="steps">
         <div className="beat">
           {Array.from({ length: 16 }, (_, i) => (
