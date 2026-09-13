@@ -20,6 +20,10 @@ function sec(id: string, name: string, kind: SectionKind, bars: number): ChartSe
   return { id, name, kind, bars };
 }
 
+function norm(s: string) {
+  return (s || "").toLowerCase().replace(/\([^)]*\)/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
+}
+
 const CHARTS: Record<string, Chart> = {
   "wagon-wheel": {
     bpm: 146, feel: "country", source: "chart",
@@ -172,11 +176,13 @@ function templateFor(feel: Feel): ChartSection[] {
 
 export function chartFor(id: string, title?: string, artist?: string, feel?: Feel): Chart {
   if (CHARTS[id]) return CHARTS[id];
-  const t = (title || "").toLowerCase();
+  const t = norm(title || "");
+  const a = norm(artist || "");
   for (const [key, chart] of Object.entries(CHARTS)) {
     const words = key.replace(/-/g, " ");
-    if (t.includes(words) || words.includes(t)) return chart;
+    if (t === words || t.includes(words) || (words.length > 4 && words.includes(t))) return chart;
   }
+  void a;
   return { source: "template", feel, form: templateFor(feel || "rock") };
 }
 
