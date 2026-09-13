@@ -90,7 +90,6 @@ export default function App() {
               type="button"
               className={tab === t.id ? "on" : ""}
               onPointerDown={() => go(t.id)}
-              onClick={() => go(t.id)}
             >
               {t.label}
             </button>
