@@ -27,6 +27,7 @@ export const SEEDS: SongSeed[] = [
 
 const BELL_Q = "2000200020002000";
 const BELL_8 = "2020202020202020";
+const USER_KEY = "gb-user-seeds";
 
 function wantsCowbell(title: string, id: string) {
   return /reaper/i.test(title) || id === "dont-fear-the-reaper";
@@ -43,10 +44,74 @@ function withBell(parts: SongPart[], eighthsOnChorus = true): SongPart[] {
   });
 }
 
+export function normName(s: string) {
+  return (s || "")
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+export function matchSeed(title: string, artist?: string, id?: string): SongSeed | null {
+  if (id) {
+    const byId = SEEDS.find((s) => s.id === id);
+    if (byId) return byId;
+  }
+  const t = normName(title);
+  const a = normName(artist || "");
+  if (!t) return null;
+  const exact = SEEDS.find((s) => {
+    const st = normName(s.title);
+    const sa = normName(s.artist);
+    if (st !== t && !t.includes(st) && !st.includes(t)) return false;
+    if (!a) return st === t || t.includes(st);
+    return sa === a || a.includes(sa) || sa.includes(a);
+  });
+  if (exact) return exact;
+  return SEEDS.find((s) => {
+    const st = normName(s.title);
+    return st.length > 3 && (t === st || t.includes(st) || st.includes(t));
+  }) || null;
+}
+
+export function loadUserSeeds(): SongSeed[] {
+  try {
+    const raw = localStorage.getItem(USER_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as SongSeed[];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((s) => s && s.id && s.title);
+  } catch {
+    return [];
+  }
+}
+
+export function rememberUserSeed(seed: { id: string; title: string; artist: string; bpm: number; feel: Feel; genre?: string }) {
+  if (SEEDS.some((s) => s.id === seed.id)) return;
+  const list = loadUserSeeds().filter(
+    (s) => s.id !== seed.id && !(normName(s.title) === normName(seed.title) && normName(s.artist) === normName(seed.artist)),
+  );
+  list.unshift({
+    id: seed.id,
+    title: seed.title,
+    artist: seed.artist,
+    bpm: seed.bpm,
+    feel: seed.feel,
+    genre: seed.genre,
+  });
+  try {
+    localStorage.setItem(USER_KEY, JSON.stringify(list.slice(0, 40)));
+  } catch { /* quota */ }
+}
+
 export function makeSong(seed: { id: string; title: string; artist: string; bpm?: number; feel?: Feel; genre?: string }): Song {
-  const trusted = !!(seed.bpm && seed.bpm >= 40);
-  let bpm = trusted ? seed.bpm! : 0;
-  const feel = seed.feel || feelFromGenre(seed.genre, bpm) || "rock";
+  const known = matchSeed(seed.title, seed.artist, seed.id);
+  const id = known?.id || seed.id;
+  const title = known?.title || seed.title;
+  const artist = known?.artist || seed.artist;
+  const trusted = !!(seed.bpm && seed.bpm >= 40) || !!(known?.bpm && known.bpm >= 40);
+  let bpm = seed.bpm && seed.bpm >= 40 ? seed.bpm : (known?.bpm || 0);
+  const feel = seed.feel || known?.feel || feelFromGenre(seed.genre, bpm) || "rock";
   if (!trusted) bpm = DEF[feel];
   if (!trusted) {
     if (feel !== "country" && feel !== "pop" && feel !== "hiphop" && bpm > 132) bpm /= 2;
@@ -55,18 +120,18 @@ export function makeSong(seed: { id: string; title: string; artist: string; bpm?
     bpm /= 2;
   }
   bpm = Math.round(Math.min(240, Math.max(40, bpm)));
-  if (seed.id === "dont-fear-the-reaper" || /reaper/i.test(seed.title || "")) {
+  if (id === "dont-fear-the-reaper" || /reaper/i.test(title || "")) {
     bpm = Math.round(seed.bpm && seed.bpm > 40 ? Math.min(seed.bpm, 148) : 141);
   }
-  const chart = chartFor(seed.id, seed.title, seed.artist, feel);
+  const chart = chartFor(id, title, artist, feel);
   if (chart.bpm && chart.source === "chart") bpm = chart.bpm;
   let parts = partsFromChart(feel, chart);
   if (!parts.length) parts = partsFor(feel);
-  if (wantsCowbell(seed.title || "", seed.id)) parts = withBell(parts);
+  if (wantsCowbell(title || "", id)) parts = withBell(parts);
   return {
-    id: seed.id,
-    title: seed.title,
-    artist: seed.artist,
+    id,
+    title,
+    artist,
     bpm,
     songBpm: bpm,
     feel,
