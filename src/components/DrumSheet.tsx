@@ -9,13 +9,13 @@ function on(pattern: Partial<Pattern>, voices: string[], step: number) {
 }
 
 const PADS: { id: string; label: string; voices: string[]; style: React.CSSProperties }[] = [
-  { id: "hat", label: "Hats", voices: ["hat", "openHat"], style: { left: "4%", top: "18%", width: "16%", height: "24%" } },
-  { id: "crash", label: "Crash", voices: ["crash"], style: { left: "22%", top: "2%", width: "20%", height: "20%" } },
-  { id: "ride", label: "Ride", voices: ["ride", "cowbell"], style: { left: "70%", top: "6%", width: "24%", height: "22%" } },
-  { id: "rack", label: "Toms", voices: ["tom", "highTom"], style: { left: "34%", top: "16%", width: "32%", height: "24%" } },
-  { id: "snare", label: "Snare", voices: ["snare", "rim", "clap"], style: { left: "16%", top: "42%", width: "20%", height: "22%" } },
-  { id: "floor", label: "Floor", voices: ["floor"], style: { left: "68%", top: "44%", width: "22%", height: "28%" } },
-  { id: "kick", label: "Kick", voices: ["kick"], style: { left: "36%", top: "46%", width: "28%", height: "38%" } },
+  { id: "hat", label: "Hats", voices: ["hat", "openHat"], style: { left: "2%", top: "16%", width: "18%", height: "24%" } },
+  { id: "crash", label: "Crash", voices: ["crash"], style: { left: "20%", top: "2%", width: "22%", height: "20%" } },
+  { id: "ride", label: "Ride", voices: ["ride", "cowbell"], style: { left: "68%", top: "4%", width: "26%", height: "22%" } },
+  { id: "rack", label: "Toms", voices: ["tom", "highTom"], style: { left: "32%", top: "18%", width: "34%", height: "24%" } },
+  { id: "snare", label: "Snare", voices: ["snare", "rim", "clap"], style: { left: "14%", top: "42%", width: "22%", height: "22%" } },
+  { id: "floor", label: "Floor", voices: ["floor"], style: { left: "66%", top: "42%", width: "24%", height: "30%" } },
+  { id: "kick", label: "Kick", voices: ["kick"], style: { left: "34%", top: "46%", width: "30%", height: "40%" } },
 ];
 
 export function DrumSheet({
@@ -40,13 +40,9 @@ export function DrumSheet({
       </p>
       <div className="kit-photo-wrap" role="img" aria-label="Full drum kit">
         <img
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Pearl_Export_Series.jpg/1280px-Pearl_Export_Series.jpg?v=fullkit"
+          src="https://images.pexels.com/photos/995301/pexels-photo-995301.jpeg?auto=compress&cs=tinysrgb&w=1400"
           alt="Full drum kit"
           className="kit-photo"
-          onError={(e) => {
-            e.currentTarget.src =
-              "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Drum_kit_overview.JPG/1280px-Drum_kit_overview.JPG";
-          }}
         />
         {PADS.map((p) => {
           const lit = now >= 0 && on(pattern, p.voices, now);
