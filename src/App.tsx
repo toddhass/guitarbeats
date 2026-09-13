@@ -5,6 +5,7 @@ import { StartDock } from "./components/StartDock";
 import { NowStrip } from "./components/NowStrip";
 import { PlayPage } from "./pages/PlayPage";
 import { PracticePage } from "./pages/PracticePage";
+import { GroovePage } from "./pages/GroovePage";
 import { KitPage } from "./pages/KitPage";
 import { LibraryPage } from "./pages/LibraryPage";
 import { bindRemote, syncMediaSession } from "./remote";
@@ -59,12 +60,13 @@ export default function App() {
 
         {tab === "play" && <PlayPage />}
         {tab === "practice" && <PracticePage />}
+        {tab === "groove" && <GroovePage />}
         {tab === "drums" && <KitPage />}
         {tab === "songs" && <LibraryPage />}
 
         <footer className="chrome with-start">
           <StartDock />
-          <nav className="tabs tabs-4">
+          <nav className="tabs tabs-5">
             {PAGES.map((t) => (
               <button
                 key={t.id}
