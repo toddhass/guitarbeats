@@ -6,7 +6,7 @@ export function LibraryPage() {
       <div className="page-head catalog-head">
         <p className="page-kicker">Catalog</p>
         <h1>Library</h1>
-        <p className="page-lead">Search a song. Tap it to jump to Stage.</p>
+        <p className="page-lead">Find a song. Add it to the set. Playing happens on Stage.</p>
       </div>
       <Library />
     </div>
