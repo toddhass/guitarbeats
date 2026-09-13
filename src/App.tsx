@@ -7,6 +7,7 @@ import { DrumPanel } from "./components/DrumPanel";
 import { Library } from "./components/Library";
 import { GroovePanel } from "./components/GroovePanel";
 import { Splash } from "./components/Splash";
+import { CoachBar } from "./components/CoachBar";
 import { bindRemote, syncMediaSession } from "./remote";
 import { useWakeLock } from "./hooks/useWakeLock";
 import type { Tab } from "./state/tab-patch";
@@ -40,10 +41,6 @@ export default function App() {
     syncMediaSession();
   }, [playing, song, bpm]);
 
-  function go(id: Tab) {
-    setTab(id);
-  }
-
   return (
     <>
       {splash && <Splash onDone={() => setSplash(false)} />}
@@ -59,6 +56,7 @@ export default function App() {
         {tab === "play" && (
           <div className="pane pane-play">
             <NowPlaying />
+            <CoachBar />
             <Transport mode="play" />
           </div>
         )}
@@ -73,6 +71,7 @@ export default function App() {
           <div className="pane pane-drums">
             <DrumPanel />
             <GroovePanel />
+            <CoachBar />
             <Transport mode="kits" />
           </div>
         )}
@@ -89,7 +88,7 @@ export default function App() {
               key={t.id}
               type="button"
               className={tab === t.id ? "on" : ""}
-              onPointerDown={() => go(t.id)}
+              onPointerDown={() => setTab(t.id)}
             >
               {t.label}
             </button>

@@ -1,5 +1,6 @@
 import { Synth, DrumVoice } from "./synth";
 import { hit, Pattern, SongPart } from "../data/grooves";
+import { intensityForPart } from "../data/brain";
 
 export class Sequencer {
   private synth: Synth;
@@ -20,6 +21,7 @@ export class Sequencer {
   clickOn = false;
   clickLevel = 0.7;
   conductor = true;
+  intensity = 1;
   onNext?: (step: number, part: SongPart, meta: { bar: number; bars: number; nextName: string }) => void;
 
   constructor(synth: Synth, ctx: AudioContext) {
@@ -35,6 +37,7 @@ export class Sequencer {
       this.step = 0;
     }
     if (this.partIndex >= this.parts.length) this.partIndex = 0;
+    this.intensity = intensityForPart(this.currentPart?.name ?? "");
   }
 
   get currentPart() {
@@ -51,7 +54,7 @@ export class Sequencer {
 
   private scheduleStep(i: number, time: number, part: SongPart, useFill: boolean) {
     const pattern: Partial<Pattern> = useFill && part.fill ? part.fill : part.groove;
-    const accent = i === 0 ? 1.28 : i % 4 === 0 ? 1.08 : 1;
+    const accent = (i === 0 ? 1.28 : i % 4 === 0 ? 1.08 : 1) * this.intensity;
     for (const voice of Object.keys(pattern)) {
       const v = hit(pattern[voice], i);
       if (v > 0) this.synth.trig(voice as DrumVoice, time, v * accent);
@@ -92,6 +95,7 @@ export class Sequencer {
       return;
     }
 
+    this.intensity = intensityForPart(part.name);
     const bars = Math.max(1, part.bars || 1);
     const lastBar = this.barsPlayed >= bars - 1;
     if (this.conductor && lastBar && this.step === 8 && !this.loopPart) {
@@ -150,6 +154,7 @@ export class Sequencer {
     this.barsPlayed = 0;
     this.partIndex = 0;
     this.filling = false;
+    this.intensity = intensityForPart(this.currentPart?.name ?? "");
   }
 
   nextPart() {
@@ -158,6 +163,7 @@ export class Sequencer {
     this.step = 0;
     this.barsPlayed = 0;
     this.filling = false;
+    this.intensity = intensityForPart(this.currentPart?.name ?? "");
   }
 
   queueFill() {
