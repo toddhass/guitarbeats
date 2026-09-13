@@ -90,6 +90,21 @@ export class Synth {
     o.connect(g); g.connect(this.dest);
     o.start(t); o.stop(t + 0.08);
   }
+  countStick(t: number, v: number, downbeat: boolean) {
+    const n = this.ns(t, downbeat ? 0.05 : 0.03);
+    const bp = this.ctx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = downbeat ? 1050 : 1650;
+    bp.Q.value = 8;
+    const g = this.env(t, (downbeat ? 0.55 : 0.28) * v, downbeat ? 0.05 : 0.03);
+    n.connect(bp); bp.connect(g); g.connect(this.dest);
+    const o = this.ctx.createOscillator();
+    o.type = "triangle";
+    o.frequency.setValueAtTime(downbeat ? 880 : 1320, t);
+    const og = this.env(t, (downbeat ? 0.22 : 0.12) * v, 0.04);
+    o.connect(og); og.connect(this.dest);
+    o.start(t); o.stop(t + 0.06);
+  }
   trig(voice: DrumVoice, t: number, v: number) {
     v = Math.max(0.05, Math.min(1.6, v));
     const sampleVoice =
