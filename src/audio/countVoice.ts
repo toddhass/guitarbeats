@@ -9,28 +9,8 @@ export function warmCountVoice() {
   warmed = true;
   try {
     window.speechSynthesis.getVoices();
-    const u = new SpeechSynthesisUtterance(".");
-    u.volume = 0.01;
-    u.rate = 2;
-    window.speechSynthesis.speak(u);
-    window.speechSynthesis.cancel();
   } catch {
-    /* iOS / embedded webview */
-  }
-}
-
-export function speakCount(word: string, bpm: number) {
-  if (!canSpeak() || !word) return;
-  try {
-    const u = new SpeechSynthesisUtterance(word);
-    u.lang = "en-US";
-    u.pitch = word === "and" || word === "a" ? 1.05 : 0.9;
-    u.volume = word === "and" || word === "a" ? 0.75 : 1;
-    const pace = Math.max(40, Math.min(200, bpm)) / 96;
-    u.rate = Math.max(0.95, Math.min(1.55, pace));
-    window.speechSynthesis.speak(u);
-  } catch {
-    /* ignore */
+    /* */
   }
 }
 
@@ -38,6 +18,23 @@ export function hushCount() {
   if (!canSpeak()) return;
   try {
     window.speechSynthesis.cancel();
+  } catch {
+    /* */
+  }
+}
+
+/** One phrase, timed to four beats, so speech does not queue past the downbeat. */
+export function speakCountPhrase(bpm: number) {
+  if (!canSpeak()) return;
+  hushCount();
+  try {
+    const seconds = (60 / Math.max(40, bpm)) * 4;
+    const u = new SpeechSynthesisUtterance("a one and a two and a three and four");
+    u.lang = "en-US";
+    u.pitch = 0.92;
+    u.volume = 1;
+    u.rate = Math.max(0.85, Math.min(1.65, 2.05 / seconds));
+    window.speechSynthesis.speak(u);
   } catch {
     /* */
   }
