@@ -82,10 +82,17 @@ export class Sequencer {
     const time = Math.max(this.nextStepTime, this.ctx.currentTime);
 
     if (this.countInLeft > 0) {
-      const beat = Math.floor(this.step / 4) + 1;
       if (this.step % 4 === 0) this.synth.countStick(time, 1, this.step === 0);
       else if (this.step % 4 === 2) this.synth.countStick(time, 0.55, false);
-      this.emit({ id: "count", name: String(beat), bars: 1, swing: 0, groove: {}, fill: {} });
+      const upcoming = this.currentPart;
+      this.emit({
+        id: upcoming?.id ?? "count",
+        name: upcoming?.name ?? "Intro",
+        bars: upcoming?.bars ?? 1,
+        swing: upcoming?.swing ?? 0,
+        groove: {},
+        fill: {},
+      });
       this.countInLeft--;
       this.nextStepTime = time + this.stepDuration();
       this.step++;
