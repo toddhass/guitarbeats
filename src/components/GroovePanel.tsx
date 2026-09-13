@@ -9,8 +9,8 @@ export function GroovePanel() {
 
   return (
     <div className="card rail rail-groove">
-      <p className="kicker">Groove</p>
-      <p className="hint">Pick a feel. Tempo stays on the sliders above.</p>
+      <p className="kicker">Feel</p>
+      <p className="hint">This is the pocket. Start still lives on the dock.</p>
       <div className="chips">
         {STYLES.map((s) => (
           <button
