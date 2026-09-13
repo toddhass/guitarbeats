@@ -2,8 +2,8 @@
   position: relative;
   border-radius: .75rem;
   overflow: hidden;
-  background: #ddd;
-  aspect-ratio: 16 / 10;
+  background: #fff;
+  aspect-ratio: 5 / 4;
 }
 .kit-photo {
   display: block;
@@ -11,13 +11,7 @@
   height: 100%;
   object-fit: contain;
   object-position: center center;
-  background: #e8e8e8;
-}
-.kit-svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  background: #ececec;
+  background: #fff;
 }
 .kit-pad {
   position: absolute;
@@ -25,13 +19,13 @@
   pointer-events: none;
 }
 .kit-pad.hit {
-  background: radial-gradient(circle, rgb(255 236 170 / .55) 0%, rgb(255 170 40 / .18) 58%, transparent 72%);
-  box-shadow: 0 0 18px rgb(255 196 70 / .55);
+  background: radial-gradient(circle, rgb(255 236 170 / .5) 0%, rgb(255 170 40 / .16) 58%, transparent 72%);
+  box-shadow: 0 0 16px rgb(255 196 70 / .5);
   animation: kitglow .18s ease-out;
 }
 @keyframes kitglow {
   0% { transform: scale(.92); opacity: .4; }
-  40% { transform: scale(1.12); opacity: 1; }
+  40% { transform: scale(1.1); opacity: 1; }
   100% { transform: scale(1.04); opacity: 1; }
 }
 .kit-beats { grid-template-columns: repeat(8, 1fr); margin-top: .75rem; }
