@@ -7,7 +7,7 @@ export class Sequencer {
   private timer: number | null = null;
   private nextStepTime = 0;
   step = 0;
-  private barsPlayed = 0;
+  barsPlayed = 0;
   bpm = 120;
   playing = false;
   parts: SongPart[] = [];
@@ -19,7 +19,8 @@ export class Sequencer {
   countInLeft = 0;
   clickOn = false;
   clickLevel = 0.7;
-  onNext?: (step: number, part: SongPart) => void;
+  conductor = true;
+  onNext?: (step: number, part: SongPart, meta: { bar: number; bars: number; nextName: string }) => void;
 
   constructor(synth: Synth, ctx: AudioContext) {
     this.synth = synth;
@@ -62,12 +63,22 @@ export class Sequencer {
     }
   }
 
+  private emit(part: SongPart) {
+    const bars = Math.max(1, part.bars || 1);
+    const next = this.parts[(this.partIndex + 1) % Math.max(1, this.parts.length)];
+    this.onNext?.(this.step, part, {
+      bar: this.barsPlayed + 1,
+      bars,
+      nextName: next?.name ?? "",
+    });
+  }
+
   private advance() {
     const time = this.nextStepTime + (this.step % 2 === 1 && this.currentPart ? this.currentPart.swing * this.stepDuration() : 0);
 
     if (this.countInLeft > 0) {
       if (this.step % 4 === 0) this.click(time, this.step === 0);
-      this.onNext?.(this.step, this.currentPart ?? { id: "count", name: "Count-in", bars: 1, swing: 0, groove: {}, fill: {} });
+      this.emit(this.currentPart ?? { id: "count", name: "Count-in", bars: 1, swing: 0, groove: {}, fill: {} });
       this.countInLeft--;
       this.nextStepTime += this.stepDuration();
       this.step++;
@@ -80,8 +91,16 @@ export class Sequencer {
       this.nextStepTime += this.stepDuration();
       return;
     }
+
+    const bars = Math.max(1, part.bars || 1);
+    const lastBar = this.barsPlayed >= bars - 1;
+    if (this.conductor && lastBar && this.step === 8 && !this.loopPart) {
+      this.filling = true;
+      this.fillLeft = 8;
+    }
+
     this.scheduleStep(this.step, time, part, this.filling);
-    this.onNext?.(this.step, part);
+    this.emit(part);
     if (this.filling) {
       this.fillLeft--;
       if (this.fillLeft <= 0) this.filling = false;
@@ -91,9 +110,16 @@ export class Sequencer {
     if (this.step >= 16) {
       this.step = 0;
       this.barsPlayed++;
-      if (this.barsPlayed >= Math.max(1, part.bars)) {
+      if (this.barsPlayed >= bars) {
         this.barsPlayed = 0;
-        if (!this.loopPart && this.parts.length) this.partIndex = (this.partIndex + 1) % this.parts.length;
+        if (!this.loopPart && this.parts.length) {
+          const prev = this.partIndex;
+          this.partIndex = (this.partIndex + 1) % this.parts.length;
+          const nxt = this.currentPart;
+          if (this.conductor && nxt && /chorus|hook/i.test(nxt.name) && prev !== this.partIndex) {
+            this.crashQueued = true;
+          }
+        }
       }
     }
   }
