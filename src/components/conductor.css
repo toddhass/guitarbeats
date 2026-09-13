@@ -1,0 +1,11 @@
+.conductor {
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+  margin-top: .9rem;
+}
+.conductor-meta {
+  color: var(--muted);
+  font-size: .82rem;
+  line-height: 1.35;
+}

@@ -1,6 +1,19 @@
 import { DEF, Feel, feelFromGenre, partsFor, SongPart } from "./grooves";
+import { chartFor, partsFromChart } from "./arrangements";
+
 export interface SongSeed { id: string; title: string; artist: string; bpm: number; feel: Feel; genre?: string; }
-export interface Song { id: string; title: string; artist: string; bpm: number; feel: Feel; parts: SongPart[]; genre?: string; }
+export interface Song {
+  id: string;
+  title: string;
+  artist: string;
+  bpm: number;
+  feel: Feel;
+  parts: SongPart[];
+  genre?: string;
+  chartSource?: "chart" | "template";
+  songBpm: number;
+}
+
 export const SEEDS: SongSeed[] = [
   { id: "wagon-wheel", title: "Wagon Wheel", artist: "Old Crow Medicine Show", bpm: 146, feel: "country" },
   { id: "wonderwall", title: "Wonderwall", artist: "Oasis", bpm: 87, feel: "rock" },
@@ -8,7 +21,7 @@ export const SEEDS: SongSeed[] = [
   { id: "country-roads", title: "Take Me Home Country Roads", artist: "John Denver", bpm: 82, feel: "folk" },
   { id: "sweet-home-alabama", title: "Sweet Home Alabama", artist: "Lynyrd Skynyrd", bpm: 98, feel: "southern" },
   { id: "wild-horses", title: "Wild Horses", artist: "The Rolling Stones", bpm: 76, feel: "ballad" },
-  { id: "dont-fear-the-reaper", title: "(Don't Fear) The Reaper", artist: "Blue Öyster Cult", bpm: 141, feel: "rock" },
+  { id: "dont-fear-the-reaper", title: "(Don't Fear) The Reaper", artist: "Blue \u00d6yster Cult", bpm: 141, feel: "rock" },
   { id: "american-soldier", title: "American Soldier", artist: "Toby Keith", bpm: 82, feel: "folk" },
 ];
 
@@ -21,7 +34,7 @@ function wantsCowbell(title: string, id: string) {
 
 function withBell(parts: SongPart[], eighthsOnChorus = true): SongPart[] {
   return parts.map((p) => {
-    const bell = p.id === "chorus" && eighthsOnChorus ? BELL_8 : BELL_Q;
+    const bell = /chorus|hook/i.test(p.name) && eighthsOnChorus ? BELL_8 : BELL_Q;
     return {
       ...p,
       groove: { ...p.groove, cowbell: bell },
@@ -45,7 +58,20 @@ export function makeSong(seed: { id: string; title: string; artist: string; bpm?
   if (seed.id === "dont-fear-the-reaper" || /reaper/i.test(seed.title || "")) {
     bpm = Math.round(seed.bpm && seed.bpm > 40 ? Math.min(seed.bpm, 148) : 141);
   }
-  let parts = partsFor(feel);
+  const chart = chartFor(seed.id, seed.title, seed.artist, feel);
+  if (chart.bpm && chart.source === "chart") bpm = chart.bpm;
+  let parts = partsFromChart(feel, chart);
+  if (!parts.length) parts = partsFor(feel);
   if (wantsCowbell(seed.title || "", seed.id)) parts = withBell(parts);
-  return { id: seed.id, title: seed.title, artist: seed.artist, bpm, feel, parts, genre: seed.genre };
+  return {
+    id: seed.id,
+    title: seed.title,
+    artist: seed.artist,
+    bpm,
+    songBpm: bpm,
+    feel,
+    parts,
+    genre: seed.genre,
+    chartSource: chart.source,
+  };
 }
