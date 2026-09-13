@@ -21,7 +21,7 @@ export const SEEDS: SongSeed[] = [
   { id: "country-roads", title: "Take Me Home Country Roads", artist: "John Denver", bpm: 82, feel: "folk" },
   { id: "sweet-home-alabama", title: "Sweet Home Alabama", artist: "Lynyrd Skynyrd", bpm: 98, feel: "southern" },
   { id: "wild-horses", title: "Wild Horses", artist: "The Rolling Stones", bpm: 76, feel: "ballad" },
-  { id: "dont-fear-the-reaper", title: "(Don't Fear) The Reaper", artist: "Blue \u00d6yster Cult", bpm: 141, feel: "rock" },
+  { id: "dont-fear-the-reaper", title: "(Don't Fear) The Reaper", artist: "Blue Öyster Cult", bpm: 141, feel: "rock" },
   { id: "american-soldier", title: "American Soldier", artist: "Toby Keith", bpm: 82, feel: "folk" },
 ];
 
@@ -59,18 +59,23 @@ export function matchSeed(title: string, artist?: string, id?: string): SongSeed
   }
   const t = normName(title);
   const a = normName(artist || "");
-  if (!t) return null;
+  if (!t || t.length < 4) return null;
   const exact = SEEDS.find((s) => {
     const st = normName(s.title);
     const sa = normName(s.artist);
-    if (st !== t && !t.includes(st) && !st.includes(t)) return false;
-    if (!a) return st === t || t.includes(st);
+    if (st !== t) return false;
+    if (!a) return true;
     return sa === a || a.includes(sa) || sa.includes(a);
   });
   if (exact) return exact;
   return SEEDS.find((s) => {
     const st = normName(s.title);
-    return st.length > 3 && (t === st || t.includes(st) || st.includes(t));
+    if (st.length < 6) return false;
+    const titleHit = t === st || (t.length >= st.length && t.includes(st)) || (st.length >= t.length && st.includes(t) && t.length >= 8);
+    if (!titleHit) return false;
+    if (!a) return t === st || t.includes(st);
+    const sa = normName(s.artist);
+    return sa === a || a.includes(sa) || sa.includes(a);
   }) || null;
 }
 
@@ -106,9 +111,9 @@ export function rememberUserSeed(seed: { id: string; title: string; artist: stri
 
 export function makeSong(seed: { id: string; title: string; artist: string; bpm?: number; feel?: Feel; genre?: string }): Song {
   const known = matchSeed(seed.title, seed.artist, seed.id);
-  const id = known?.id || seed.id;
-  const title = known?.title || seed.title;
-  const artist = known?.artist || seed.artist;
+  const id = seed.id;
+  const title = seed.title;
+  const artist = seed.artist;
   const trusted = !!(seed.bpm && seed.bpm >= 40) || !!(known?.bpm && known.bpm >= 40);
   let bpm = seed.bpm && seed.bpm >= 40 ? seed.bpm : (known?.bpm || 0);
   const feel = seed.feel || known?.feel || feelFromGenre(seed.genre, bpm) || "rock";
@@ -123,11 +128,12 @@ export function makeSong(seed: { id: string; title: string; artist: string; bpm?
   if (id === "dont-fear-the-reaper" || /reaper/i.test(title || "")) {
     bpm = Math.round(seed.bpm && seed.bpm > 40 ? Math.min(seed.bpm, 148) : 141);
   }
-  const chart = chartFor(id, title, artist, feel);
+  if (known?.bpm && known.bpm >= 40 && (!seed.bpm || seed.bpm < 40)) bpm = known.bpm;
+  const chart = chartFor(known?.id || id, title, artist, feel);
   if (chart.bpm && chart.source === "chart") bpm = chart.bpm;
   let parts = partsFromChart(feel, chart);
   if (!parts.length) parts = partsFor(feel);
-  if (wantsCowbell(title || "", id)) parts = withBell(parts);
+  if (wantsCowbell(title || "", known?.id || id)) parts = withBell(parts);
   return {
     id,
     title,
