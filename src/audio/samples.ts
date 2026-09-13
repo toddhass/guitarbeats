@@ -1,11 +1,41 @@
-import { Kit, KIT_URLS, GATE_VOICES } from "./kits";
+import { Kit, KIT_URLS } from "./kits";
+
+const LEVEL: Record<string, number> = {
+  kick: 0.72,
+  snare: 0.62,
+  clap: 0.55,
+  rim: 0.5,
+  hat: 0.38,
+  openHat: 0.34,
+  pedalHat: 0.32,
+  ride: 0.3,
+  crash: 0.28,
+  tom: 0.55,
+  highTom: 0.52,
+  floor: 0.58,
+  cowbell: 0.4,
+};
+
+const TAIL: Record<string, number> = {
+  kick: 0.38,
+  snare: 0.22,
+  clap: 0.18,
+  rim: 0.12,
+  hat: 0.08,
+  pedalHat: 0.07,
+  openHat: 0.22,
+  ride: 0.45,
+  crash: 1.1,
+  tom: 0.32,
+  highTom: 0.28,
+  floor: 0.4,
+  cowbell: 0.2,
+};
 
 export class SampleBank {
   private ctx: AudioContext;
   private cache = new Map<string, AudioBuffer>();
   private dry: GainNode | null = null;
-  private snareSend: GainNode | null = null;
-  private bus: DynamicsCompressorNode | null = null;
   ready = false;
 
   constructor(ctx: AudioContext) {
@@ -13,57 +43,21 @@ export class SampleBank {
   }
 
   attach(dest: AudioNode) {
-    if (this.bus) return;
-    const ctx = this.ctx;
-    const bus = ctx.createDynamicsCompressor();
-    bus.threshold.value = -16;
-    bus.knee.value = 8;
-    bus.ratio.value = 4.5;
-    bus.attack.value = 0.004;
-    bus.release.value = 0.12;
-    const out = ctx.createGain();
-    out.gain.value = 1.15;
-    bus.connect(out);
-    out.connect(dest);
-
-    const dry = ctx.createGain();
+    if (this.dry) return;
+    const comp = this.ctx.createDynamicsCompressor();
+    comp.threshold.value = -22;
+    comp.knee.value = 12;
+    comp.ratio.value = 2.4;
+    comp.attack.value = 0.008;
+    comp.release.value = 0.18;
+    const out = this.ctx.createGain();
+    out.gain.value = 0.9;
+    const dry = this.ctx.createGain();
     dry.gain.value = 1;
-    dry.connect(bus);
-
-    const send = ctx.createGain();
-    send.gain.value = 0.55;
-    const hp = ctx.createBiquadFilter();
-    hp.type = "highpass";
-    hp.frequency.value = 280;
-    const delay = ctx.createDelay(0.4);
-    delay.delayTime.value = 0.028;
-    const verb = ctx.createConvolver();
-    verb.buffer = this.plate(0.22);
-    const gate = ctx.createGain();
-    gate.gain.value = 0.7;
-    send.connect(hp);
-    hp.connect(delay);
-    delay.connect(verb);
-    verb.connect(gate);
-    gate.connect(bus);
-
-    this.bus = bus;
+    dry.connect(comp);
+    comp.connect(out);
+    out.connect(dest);
     this.dry = dry;
-    this.snareSend = send;
-  }
-
-  private plate(seconds: number) {
-    const rate = this.ctx.sampleRate;
-    const len = Math.floor(rate * seconds);
-    const buf = this.ctx.createBuffer(2, len, rate);
-    for (let c = 0; c < 2; c++) {
-      const d = buf.getChannelData(c);
-      for (let i = 0; i < len; i++) {
-        const env = Math.pow(1 - i / len, 1.6);
-        d[i] = (Math.random() * 2 - 1) * env;
-      }
-    }
-    return buf;
   }
 
   async load(kit: Kit) {
@@ -84,32 +78,37 @@ export class SampleBank {
         }
       })
     );
-    this.ready = true;
+    this.ready = [...this.cache.keys()].some((k) => k.startsWith(kit + ":"));
   }
 
   loadAll() {
-    return Promise.all((Object.keys(KIT_URLS) as Kit[]).map((k) => this.load(k)));
+    const order = Object.keys(KIT_URLS) as Kit[];
+    const first = order.includes("eighty") ? (["eighty", ...order.filter((k) => k !== "eighty")] as Kit[]) : order;
+    return first.reduce<Promise<void>>(async (prev, kit) => {
+      await prev;
+      await this.load(kit);
+    }, Promise.resolve());
   }
 
   play(kit: Kit, voice: string, dest: AudioNode, time: number, vel: number) {
     this.attach(dest);
-    const buf = this.cache.get(kit + ":" + voice) || this.cache.get("eighty:" + voice);
+    const buf =
+      this.cache.get(kit + ":" + voice) ||
+      this.cache.get("eighty:" + voice) ||
+      this.cache.get("room:" + voice);
     if (!buf || !this.dry) return false;
     const src = this.ctx.createBufferSource();
     src.buffer = buf;
     const g = this.ctx.createGain();
-    const peak = Math.max(0.08, Math.min(1.35, vel));
-    g.gain.setValueAtTime(peak, time);
+    const peak = (LEVEL[voice] ?? 0.5) * Math.max(0.15, Math.min(1.1, vel));
+    const tail = TAIL[voice] ?? 0.25;
+    const t = Math.max(time, this.ctx.currentTime);
+    g.gain.setValueAtTime(peak, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + tail);
     src.connect(g);
     g.connect(this.dry);
-    if (this.snareSend && GATE_VOICES.has(voice) && kit !== "dry") {
-      const wet = this.ctx.createGain();
-      wet.gain.setValueAtTime(0.85 * peak, time);
-      wet.gain.exponentialRampToValueAtTime(0.0001, time + 0.16);
-      g.connect(wet);
-      wet.connect(this.snareSend);
-    }
-    src.start(time);
+    src.start(t);
+    src.stop(t + tail + 0.05);
     return true;
   }
 }
