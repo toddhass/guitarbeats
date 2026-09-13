@@ -1,5 +1,6 @@
 import { hit } from "../data/grooves";
 import type { Pattern, SongPart } from "../data/grooves";
+import "../kit.css";
 
 const BEATS = ["1", "e", "&", "a", "2", "e", "&", "a", "3", "e", "&", "a", "4", "e", "&", "a"];
 
