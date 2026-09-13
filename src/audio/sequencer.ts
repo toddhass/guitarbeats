@@ -1,7 +1,9 @@
 import { Synth, DrumVoice } from "./synth";
 import { hit, Pattern, SongPart } from "../data/grooves";
 import { intensityForPart } from "../data/brain";
-import { hushCount, speakCountPhrase, warmCountVoice } from "./countVoice";
+import { hushCount, speakCountWord, warmCountVoice } from "./countVoice";
+
+const COUNT_DOWN = ["one", "two", "three", "four"] as const;
 
 export class Sequencer {
   private synth: Synth;
@@ -19,6 +21,7 @@ export class Sequencer {
   crashQueued = false;
   loopPart = false;
   countInLeft = 0;
+  wantCount = true;
   clickOn = false;
   clickLevel = 0.7;
   conductor = true;
@@ -53,6 +56,13 @@ export class Sequencer {
     this.synth.stick(time, this.clickLevel, downbeat);
   }
 
+  private speakBeat(step: number) {
+    if (step === 0) speakCountWord("a", this.bpm);
+    if (step % 4 === 0) speakCountWord(COUNT_DOWN[Math.floor(step / 4)] || "one", this.bpm);
+    else if (step % 4 === 2) speakCountWord("and", this.bpm);
+    else if (step % 4 === 3 && step < 12) speakCountWord("a", this.bpm);
+  }
+
   private scheduleStep(i: number, time: number, part: SongPart, useFill: boolean) {
     const pattern: Partial<Pattern> = useFill && part.fill ? part.fill : part.groove;
     const accent = (i === 0 ? 1.28 : i % 4 === 0 ? 1.08 : 1) * this.intensity;
@@ -83,8 +93,9 @@ export class Sequencer {
 
     if (this.countInLeft > 0) {
       const beat = Math.floor(this.step / 4) + 1;
-      if (this.step % 4 === 0) this.synth.stick(time, 1, this.step === 0);
-      else if (this.step % 4 === 2) this.synth.stick(time, 0.45, false);
+      if (this.step % 4 === 0) this.synth.countStick(time, 1, this.step === 0);
+      else if (this.step % 4 === 2) this.synth.countStick(time, 0.55, false);
+      this.speakBeat(this.step);
       this.emit({ id: "count", name: String(beat), bars: 1, swing: 0, groove: {}, fill: {} });
       this.countInLeft--;
       this.nextStepTime = time + this.stepDuration();
@@ -92,7 +103,6 @@ export class Sequencer {
       if (this.countInLeft <= 0) {
         this.step = 0;
         this.barsPlayed = 0;
-        hushCount();
         void this.ctx.resume();
       } else if (this.step >= 16) {
         this.step = 0;
@@ -146,12 +156,16 @@ export class Sequencer {
   };
 
   armCountIn() {
+    if (!this.conductor || !this.wantCount) {
+      this.countInLeft = 0;
+      return;
+    }
     warmCountVoice();
+    hushCount();
     this.countInLeft = 16;
     this.step = 0;
     this.barsPlayed = 0;
     this.filling = false;
-    speakCountPhrase(this.bpm);
   }
 
   start() {
