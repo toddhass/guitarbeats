@@ -1,8 +1,9 @@
-export type Tab = "play" | "practice" | "drums" | "songs";
+export type Tab = "play" | "practice" | "groove" | "drums" | "songs";
 
 export const PAGES: { id: Tab; path: string; label: string; title: string }[] = [
   { id: "play", path: "#/play", label: "Play", title: "Play" },
   { id: "practice", path: "#/practice", label: "Practice", title: "Practice" },
+  { id: "groove", path: "#/groove", label: "Groove", title: "Groove" },
   { id: "drums", path: "#/kit", label: "Kit", title: "Kit" },
   { id: "songs", path: "#/library", label: "Library", title: "Library" },
 ];
@@ -14,6 +15,7 @@ export function pathFor(tab: Tab) {
 export function tabFromHash(hash = window.location.hash): Tab {
   const raw = (hash || "").replace(/^#\/?/, "").split("?")[0].toLowerCase();
   if (raw === "practice" || raw === "coach") return "practice";
+  if (raw === "groove" || raw === "feel") return "groove";
   if (raw === "kit" || raw === "drums") return "drums";
   if (raw === "library" || raw === "songs" || raw === "search") return "songs";
   return "play";
