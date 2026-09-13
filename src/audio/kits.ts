@@ -1,59 +1,81 @@
-export type Kit =
-  | "dry"
-  | "room"
-  | "linn"
-  | "cr78"
-  | "r8"
-  | "stark"
-  | "techno"
-  | "fm"
-  | "bongos"
-  | "kpr77"
-  | "kit3"
-  | "cheeba1"
-  | "cheeba2";
+export type Kit = "eighty" | "room" | "dry" | "linn" | "power" | "r8" | "stark";
 
 export const KITS: { id: Kit; label: string }[] = [
-  { id: "dry", label: "Dry room" },
-  { id: "room", label: "Country room" },
-  { id: "linn", label: "Linn" },
-  { id: "cr78", label: "CR-78" },
-  { id: "r8", label: "R-8" },
-  { id: "stark", label: "Stark" },
-  { id: "techno", label: "Techno" },
-  { id: "fm", label: "4OP-FM" },
-  { id: "bongos", label: "Bongos" },
-  { id: "kpr77", label: "KPR-77" },
-  { id: "kit3", label: "Kit 3" },
-  { id: "cheeba1", label: "Cheeba 1" },
-  { id: "cheeba2", label: "Cheeba 2" },
+  { id: "eighty", label: "80s room" },
+  { id: "room", label: "80s room" },
+  { id: "linn", label: "LinnDrum" },
+  { id: "power", label: "Power 909" },
+  { id: "r8", label: "Power 909" },
+  { id: "dry", label: "Dry Pearl" },
+  { id: "stark", label: "TR-505" },
 ];
 
-const TONE = "https://tonejs.github.io/audio/drum-samples";
+const ORA = "https://cdn.jsdelivr.net/gh/oramics/sampled@master";
+const AVL = `${ORA}/DRUMS/avl-drumkits-1.1`;
+const LM2 = `${ORA}/DM/LM-2/samples`;
+const NINE = `${ORA}/DM/TR-909/Detroit/samples`;
+const FIVE = `${ORA}/DM/TR-505/samples`;
 
-function tone(folder: string) {
-  return {
-    kick: `${TONE}/${folder}/kick.mp3`,
-    snare: `${TONE}/${folder}/snare.mp3`,
-    hat: `${TONE}/${folder}/hihat.mp3`,
-    tom: `${TONE}/${folder}/tom1.mp3`,
-    highTom: `${TONE}/${folder}/tom2.mp3`,
-    floor: `${TONE}/${folder}/tom3.mp3`,
-  };
-}
+const pearl = {
+  kick: `${AVL}/36-Pearl22Kick-4.wav`,
+  snare: `${AVL}/38-PearlSnare-4.wav`,
+  hat: `${AVL}/42-SabianRockHatClosed-4.wav`,
+  openHat: `${AVL}/46-SabianRockHatSemiOpen-4.wav`,
+  pedalHat: `${AVL}/44-SabianRockHatPedal-3.wav`,
+  crash: `${AVL}/49-SabianAA16Crash-3.wav`,
+  ride: `${AVL}/51-SabianAAX20Ride-3.wav`,
+  tom: `${AVL}/45-Pearl12Tom-4.wav`,
+  highTom: `${AVL}/47-Pearl13Tom2-3.wav`,
+  floor: `${AVL}/41-Pearl16FloorTom-4.wav`,
+  rim: `${AVL}/40-PearlSnareEdge-4.wav`,
+};
 
 export const KIT_URLS: Record<Kit, Record<string, string>> = {
-  room: tone("acoustic-kit"),
-  dry: tone("Kit8"),
-  linn: tone("LINN"),
-  cr78: tone("CR78"),
-  r8: tone("R8"),
-  stark: tone("Stark"),
-  techno: tone("Techno"),
-  fm: tone("4OP-FM"),
-  bongos: tone("Bongos"),
-  kpr77: tone("KPR77"),
-  kit3: tone("Kit3"),
-  cheeba1: tone("TheCheebacabra1"),
-  cheeba2: tone("TheCheebacabra2"),
+  eighty: pearl,
+  room: pearl,
+  dry: {
+    ...pearl,
+    snare: `${AVL}/38-PearlSnare-2.wav`,
+    kick: `${AVL}/36-Pearl22Kick-2.wav`,
+  },
+  linn: {
+    kick: `${LM2}/kick.wav`,
+    snare: `${LM2}/snare-m.wav`,
+    hat: `${LM2}/hihat-closed.wav`,
+    openHat: `${LM2}/hihat-open.wav`,
+    crash: `${LM2}/crash.wav`,
+    ride: `${LM2}/ride.wav`,
+    tom: `${LM2}/tom-m.wav`,
+    highTom: `${LM2}/tom-h.wav`,
+    floor: `${LM2}/tom-l.wav`,
+    clap: `${LM2}/clap.wav`,
+    cowbell: `${LM2}/cowb.wav`,
+    rim: `${LM2}/stick-m.wav`,
+  },
+  power: {
+    kick: `${NINE}/kick.wav`,
+    snare: `${NINE}/snare.wav`,
+    hat: `${NINE}/hihat-closed.wav`,
+    openHat: `${NINE}/hihat-open-1.wav`,
+    crash: `${NINE}/cymbal.wav`,
+    tom: `${NINE}/tom-h.wav`,
+    clap: `${NINE}/clap-1.wav`,
+    rim: `${NINE}/rim.wav`,
+  },
+  r8: {
+    kick: `${NINE}/kick.wav`,
+    snare: `${NINE}/snare.wav`,
+    hat: `${NINE}/hihat-closed.wav`,
+    openHat: `${NINE}/hihat-open-1.wav`,
+    crash: `${NINE}/cymbal.wav`,
+    tom: `${NINE}/tom-h.wav`,
+    clap: `${NINE}/clap-1.wav`,
+  },
+  stark: {
+    kick: `${FIVE}/tr505-kick.wav`,
+    snare: `${FIVE}/tr505-snare.wav`,
+    hat: `${FIVE}/tr505-kick.wav`,
+  },
 };
+
+export const GATE_VOICES = new Set(["snare", "clap", "rim"]);
