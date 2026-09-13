@@ -1,9 +1,7 @@
 import { Synth, DrumVoice } from "./synth";
 import { hit, Pattern, SongPart } from "../data/grooves";
 import { intensityForPart } from "../data/brain";
-import { hushCount, speakCount, warmCountVoice } from "./countVoice";
-
-const COUNT_WORDS = ["one", "two", "three", "four"] as const;
+import { hushCount, speakCountPhrase, warmCountVoice } from "./countVoice";
 
 export class Sequencer {
   private synth: Synth;
@@ -55,13 +53,6 @@ export class Sequencer {
     this.synth.stick(time, this.clickLevel, downbeat);
   }
 
-  private speakCountStep(step: number) {
-    if (step === 0) speakCount("a", this.bpm);
-    if (step % 4 === 0) speakCount(COUNT_WORDS[Math.floor(step / 4)] || "one", this.bpm);
-    else if (step % 4 === 2) speakCount("and", this.bpm);
-    else if (step % 4 === 3 && step < 12) speakCount("a", this.bpm);
-  }
-
   private scheduleStep(i: number, time: number, part: SongPart, useFill: boolean) {
     const pattern: Partial<Pattern> = useFill && part.fill ? part.fill : part.groove;
     const accent = (i === 0 ? 1.28 : i % 4 === 0 ? 1.08 : 1) * this.intensity;
@@ -87,23 +78,31 @@ export class Sequencer {
   }
 
   private advance() {
-    const time = this.nextStepTime + (this.step % 2 === 1 && this.currentPart ? this.currentPart.swing * this.stepDuration() : 0);
+    if (this.ctx.state !== "running") void this.ctx.resume();
+    const time = Math.max(this.nextStepTime, this.ctx.currentTime);
 
     if (this.countInLeft > 0) {
       const beat = Math.floor(this.step / 4) + 1;
       if (this.step % 4 === 0) this.synth.stick(time, 1, this.step === 0);
-      this.speakCountStep(this.step);
+      else if (this.step % 4 === 2) this.synth.stick(time, 0.45, false);
       this.emit({ id: "count", name: String(beat), bars: 1, swing: 0, groove: {}, fill: {} });
       this.countInLeft--;
-      this.nextStepTime += this.stepDuration();
+      this.nextStepTime = time + this.stepDuration();
       this.step++;
-      if (this.step >= 16) this.step = 0;
+      if (this.countInLeft <= 0) {
+        this.step = 0;
+        this.barsPlayed = 0;
+        hushCount();
+        void this.ctx.resume();
+      } else if (this.step >= 16) {
+        this.step = 0;
+      }
       return;
     }
 
     const part = this.currentPart;
     if (!part) {
-      this.nextStepTime += this.stepDuration();
+      this.nextStepTime = time + this.stepDuration();
       return;
     }
 
@@ -121,7 +120,7 @@ export class Sequencer {
       this.fillLeft--;
       if (this.fillLeft <= 0) this.filling = false;
     }
-    this.nextStepTime += this.stepDuration();
+    this.nextStepTime = time + this.stepDuration();
     this.step++;
     if (this.step >= 16) {
       this.step = 0;
@@ -141,24 +140,26 @@ export class Sequencer {
   }
 
   private tick = () => {
+    if (this.playing && this.ctx.state !== "running") void this.ctx.resume();
     while (this.playing && this.nextStepTime < this.ctx.currentTime + 0.12) this.advance();
     if (this.playing) this.timer = window.setTimeout(this.tick, 25);
   };
 
   armCountIn() {
     warmCountVoice();
-    hushCount();
     this.countInLeft = 16;
     this.step = 0;
     this.barsPlayed = 0;
     this.filling = false;
+    speakCountPhrase(this.bpm);
   }
 
   start() {
     if (this.playing) return;
     warmCountVoice();
+    void this.ctx.resume();
     this.playing = true;
-    this.nextStepTime = this.ctx.currentTime + 0.04;
+    this.nextStepTime = this.ctx.currentTime + 0.05;
     this.tick();
   }
 
