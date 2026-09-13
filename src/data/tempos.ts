@@ -34,6 +34,9 @@ const KNOWN: Record<string, number> = {
   "last night|morgan wallen": 110,
   "something in the orange|zach bryan": 86,
   "heading south|zach bryan": 88,
+  "thriller|michael jackson": 118,
+  "billie jean|michael jackson": 117,
+  "beat it|michael jackson": 139,
 };
 
 export function normKey(title: string, artist: string) {
