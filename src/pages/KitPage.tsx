@@ -1,5 +1,4 @@
 import { DrumPanel } from "../components/DrumPanel";
-import { GroovePanel } from "../components/GroovePanel";
 import { Transport } from "../components/Transport";
 
 export function KitPage() {
@@ -8,10 +7,9 @@ export function KitPage() {
       <div className="page-head kit-head">
         <p className="page-kicker">Floor</p>
         <h1>Kit</h1>
-        <p className="page-lead">How the drums sound. Form and start live on Play.</p>
+        <p className="page-lead">How the drums sound. Feel lives on Groove.</p>
       </div>
       <DrumPanel />
-      <GroovePanel />
       <Transport mode="kits" />
     </div>
   );
