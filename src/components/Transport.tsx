@@ -1,5 +1,4 @@
 import { useApp } from "../state/store";
-import { STYLES } from "../data/grooves";
 import { KITS } from "../audio/kits";
 
 export function Transport({ mode = "play" }: { mode?: "play" | "stage" | "kits" }) {
@@ -7,8 +6,6 @@ export function Transport({ mode = "play" }: { mode?: "play" | "stage" | "kits" 
   const nextPart = useApp((s) => s.nextPart);
   const restart = useApp((s) => s.restart);
   const crash = useApp((s) => s.crash);
-  const song = useApp((s) => s.song);
-  const selectFeel = useApp((s) => s.selectFeel);
   const bpm = useApp((s) => s.bpm);
   const setBpm = useApp((s) => s.setBpm);
   const volume = useApp((s) => s.volume);
@@ -89,12 +86,6 @@ export function Transport({ mode = "play" }: { mode?: "play" | "stage" | "kits" 
             <input type="range" min={40} max={240} value={bpm} onChange={(e) => setBpm(Number(e.target.value))} />
             <span>{bpm}</span>
           </label>
-        </div>
-        <p className="label" style={{ marginTop: "0.85rem" }}>Feel</p>
-        <div className="chips">
-          {STYLES.map((s) => (
-            <button key={s.id} type="button" className={`chip${song.feel === s.id ? " on" : ""}`} {...press(() => selectFeel(s.id))}>{s.label}</button>
-          ))}
         </div>
       </section>
     </>
