@@ -109,13 +109,14 @@ export const useApp = create<{
       } catch { /* */ }
     }
     window.scrollTo({ top: 0, behavior: "smooth" });
+    const tab = get().tab;
     set({
       song,
       bpm,
       playing: true,
       step: 0,
       partName: get().countIn ? "Count-in" : (song.parts[0]?.name ?? "Intro"),
-      tab: "play",
+      tab: tab === "songs" ? "play" : tab,
     });
   }
 
@@ -222,7 +223,7 @@ export const useApp = create<{
       if (!song) return;
       void resolveSong(song).then((ready) => {
         const list = get().library.map((s) => (s.id === ready.id ? ready : s));
-        set({ library: list });
+        set({ library: list, tab: "play" });
         beginPlayback(ready);
       });
     },
@@ -240,8 +241,9 @@ export const useApp = create<{
       const { ctx, seq } = getEngine();
       unlockAudio(ctx);
       seq.setParts(song.parts, true);
-      seq.bpm = Math.max(40, Math.round(song.bpm * get().speed));
-      set({ song, partName: song.parts[0]?.name ?? "Intro" });
+      const bpm = Math.max(40, Math.round(get().bpm));
+      seq.bpm = bpm;
+      set({ song: { ...song, bpm }, partName: song.parts[0]?.name ?? "Intro", bpm });
     },
 
     selectPart: (id) => {
@@ -258,7 +260,7 @@ export const useApp = create<{
 
     setBpm: (bpm) => {
       getEngine().seq.bpm = bpm;
-      set({ bpm, speed: 1 });
+      set({ bpm, speed: 1, song: { ...get().song, bpm } });
     },
 
     setVolume: (v) => {
