@@ -167,13 +167,20 @@ export const useApp = create<{
 
   async function resolveSong(song: Song): Promise<Song> {
     const seeded = matchSeed(song.title, song.artist, song.id);
-    if (seeded) return makeSong({ ...seeded, genre: song.genre });
+    if (seeded) return makeSong({ ...seeded, genre: song.genre, ms: song.ms });
     const gen = ++lookupGen;
     const bpm = await lookupTempo(song.title, song.artist);
     if (gen !== lookupGen) return song;
-    if (!bpm) return song;
-    const feel = feelFromGenre(song.genre, bpm);
-    return makeSong({ id: song.id, title: song.title, artist: song.artist, bpm, feel, genre: song.genre });
+    const feel = bpm ? feelFromGenre(song.genre, bpm) : song.feel;
+    return makeSong({
+      id: song.id,
+      title: song.title,
+      artist: song.artist,
+      bpm: bpm || song.bpm,
+      feel,
+      genre: song.genre,
+      ms: song.ms,
+    });
   }
 
   return {
@@ -293,6 +300,7 @@ export const useApp = create<{
           bpm: ready.songBpm || ready.bpm,
           feel: ready.feel,
           genre: ready.genre,
+          ms: ready.ms,
         });
         const list = get().library.map((s) => (s.id === ready.id || s.id === song.id ? ready : s));
         if (!list.some((s) => s.id === ready.id)) list.unshift(ready);
@@ -313,6 +321,7 @@ export const useApp = create<{
         bpm: get().song.songBpm || get().song.bpm,
         feel,
         genre: cur.genre,
+        ms: cur.ms,
       });
       const { ctx, seq } = getEngine();
       unlockAudio(ctx);
