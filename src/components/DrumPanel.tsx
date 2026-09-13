@@ -13,7 +13,7 @@ export function DrumPanel() {
   const setLoopPart = useApp((s) => s.setLoopPart);
   const setCountIn = useApp((s) => s.setCountIn);
   const setSpeed = useApp((s) => s.setSpeed);
-  const nextPart = useApp((s) => s.nextPart);
+  const selectPart = useApp((s) => s.selectPart);
   const part = song.parts.find((p) => p.name === partName) ?? song.parts[0];
 
   return (
@@ -27,16 +27,14 @@ export function DrumPanel() {
         <button type="button" className={`chip${speed === 0.7 ? " on" : ""}`} onClick={() => setSpeed(0.7)}>Slow</button>
         <button type="button" className={`chip${speed === 1 ? " on" : ""}`} onClick={() => setSpeed(1)}>Full</button>
       </div>
-      <p className="label" style={{ marginTop: "0.85rem" }}>Part</p>
+      <p className="label" style={{ marginTop: "0.85rem" }}>Part — tap like a chord</p>
       <div className="chords">
         {song.parts.map((p) => (
           <button
             key={p.id}
             type="button"
             className={`chord${p.name === part?.name ? " on" : ""}`}
-            onClick={() => {
-              if (p.name !== part?.name) nextPart();
-            }}
+            onClick={() => selectPart(p.id)}
           >
             {p.name}
           </button>

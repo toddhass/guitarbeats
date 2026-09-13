@@ -19,7 +19,7 @@ button { font-family: inherit; }
 .wrap { width: 100%; max-width: 28rem; margin: 0 auto; padding: 1rem 1rem 5.5rem; display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
 @media (min-width: 768px) {
   .wrap { max-width: 46rem; padding: 1.5rem 1.5rem 6rem; }
-  .pane-practice { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+  .pane-practice { display: grid; grid-template-columns: 1fr; gap: 1rem; align-items: start; }
   .wrap.pane-practice .pane-practice { display: grid; }
   .list { max-height: 28rem; }
 }
@@ -90,6 +90,21 @@ input[type=search] { width: 100%; height: 3rem; border: 1px solid var(--line); b
 .empty { padding: .75rem .75rem; text-align: center; color: var(--muted); }
 .pane { display: flex; flex-direction: column; gap: 0.75rem; }
 .library, .rail-groove { display: flex; flex-direction: column; gap: .75rem; }
-.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .25rem; padding: .5rem 1rem max(.75rem, env(safe-area-inset-bottom)); background: rgb(17 16 14 / .94); }
-.tabs button { min-height: 2.7rem; border: 0; border-radius: .5rem; background: transparent; color: var(--fg); font: 600 .95rem Figtree, sans-serif; }
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: .2rem; padding: .5rem .55rem max(.75rem, env(safe-area-inset-bottom)); background: rgb(17 16 14 / .94); }
+.tabs button { min-height: 2.7rem; border: 0; border-radius: .5rem; background: transparent; color: var(--fg); font: 600 .82rem Figtree, sans-serif; }
 .tabs button.on { background: var(--card); }
+.drum-staff { border: 1px solid var(--line); border-radius: .5rem; overflow-x: auto; background: #141311; }
+.drum-head, .drum-line { display: grid; grid-template-columns: 3.4rem repeat(16, minmax(1.05rem, 1fr)); min-width: 22rem; }
+.drum-line { border-top: 1px solid var(--line); }
+.drum-lab { display: flex; align-items: center; padding: 0 .35rem; font-size: .62rem; font-weight: 700; color: var(--muted); letter-spacing: -.02em; }
+.drum-beat, .drum-cell { min-height: 1.7rem; display: flex; align-items: center; justify-content: center; position: relative; font-size: .62rem; font-weight: 700; color: var(--muted); }
+.drum-beat.down, .drum-cell.down { box-shadow: inset 1px 0 0 rgb(255 255 255 / .16); }
+.drum-beat.on, .drum-cell.now { background: rgb(243 238 228 / .14); }
+.drum-cell b { width: 1.05rem; height: 1.05rem; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: .72rem; color: #141210; }
+.drum-cell b.ghost { opacity: .45; }
+.v-hat, .v-ride, .v-oh, .v-crash { background: var(--f1); }
+.v-snare, .v-rim, .v-clap { background: var(--f3); }
+.v-kick, .v-floor { background: var(--f2); }
+.v-tom { background: var(--f4); }
+.v-bell { background: #e6c15a; }
+.drum-key .v-hat, .drum-key .v-snare, .drum-key .v-kick, .drum-key .v-bell { color: #141210; }
