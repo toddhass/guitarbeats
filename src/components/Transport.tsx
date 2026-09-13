@@ -19,6 +19,10 @@ export function Transport({ mode = "play" }: { mode?: "play" | "kits" }) {
   const setClickOn = useApp((s) => s.setClickOn);
   const clickLevel = useApp((s) => s.clickLevel);
   const setClickLevel = useApp((s) => s.setClickLevel);
+  const conductorOn = useApp((s) => s.conductorOn);
+  const setConductorOn = useApp((s) => s.setConductorOn);
+  const countIn = useApp((s) => s.countIn);
+  const setCountIn = useApp((s) => s.setCountIn);
 
   function press(fn: () => void) {
     return {
@@ -57,7 +61,12 @@ export function Transport({ mode = "play" }: { mode?: "play" | "kits" }) {
         </section>
       ) : (
         <section className="card transport-groove">
-          <div className="sliders">
+          <p className="label">Conductor</p>
+          <div className="chips">
+            <button type="button" className={`chip${conductorOn ? " on" : ""}`} {...press(() => setConductorOn(!conductorOn))}>Conductor</button>
+            <button type="button" className={`chip${countIn ? " on" : ""}`} {...press(() => setCountIn(!countIn))}>Count</button>
+          </div>
+          <div className="sliders" style={{ marginTop: "0.85rem" }}>
             <label className="sl">
               Tempo
               <input type="range" min={40} max={240} value={bpm} onChange={(e) => setBpm(Number(e.target.value))} />
