@@ -62,8 +62,8 @@ export default function App() {
         {tab === "drums" && <KitPage />}
         {tab === "songs" && <LibraryPage />}
 
-        <footer className={`chrome${tab === "play" ? " with-start" : ""}`}>
-          {tab === "play" && <StartDock />}
+        <footer className="chrome with-start">
+          <StartDock />
           <nav className="tabs tabs-4">
             {PAGES.map((t) => (
               <button
