@@ -2,8 +2,7 @@ function slug(s: string) {
   return s
     .toLowerCase()
     .normalize("NFKD")
-    .replace(/[^
-\w\s-]/g, "")
+    .replace(/[^\w\s-]/g, "")
     .trim()
     .replace(/\s+/g, "-");
 }
@@ -22,10 +21,13 @@ function parseBpm(html: string): number | null {
   return null;
 }
 
-export default async function handler(req: { query?: Record<string, string | string[]> }, res: {
-  setHeader: (k: string, v: string) => void;
-  status: (n: number) => { json: (b: unknown) => void };
-}) {
+export default async function handler(
+  req: { query?: Record<string, string | string[]> },
+  res: {
+    setHeader: (k: string, v: string) => void;
+    status: (n: number) => { json: (b: unknown) => void };
+  }
+) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Cache-Control", "s-maxage=86400, stale-while-revalidate=604800");
   const title = String(req.query?.title || "").trim();
