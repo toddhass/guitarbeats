@@ -20,14 +20,13 @@ body.pane-drums { background: #16110c; }
 body.pane-songs { background: #101014; }
 button:not(:disabled) { cursor: pointer; }
 button { font-family: inherit; }
-.wrap { width: 100%; max-width: 28rem; margin: 0 auto; padding: 1rem 1rem 6.5rem; display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
-.wrap.page-play { padding-bottom: 9.75rem; gap: .7rem; }
+.wrap { width: 100%; max-width: 28rem; margin: 0 auto; padding: 1rem 1rem 9.75rem; display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
+.wrap.page-play { gap: .7rem; }
 .wrap.page-practice { gap: .85rem; }
 .wrap.page-drums { gap: .85rem; }
 .wrap.page-songs { gap: .6rem; }
 @media (min-width: 768px) {
-  .wrap { max-width: 46rem; padding: 1.5rem 1.5rem 7rem; }
-  .wrap.page-play { padding-bottom: 10rem; }
+  .wrap { max-width: 46rem; padding: 1.5rem 1.5rem 10rem; }
   .list { max-height: 32rem; }
 }
 .page-head { padding: .15rem .1rem .35rem; border-bottom: 1px solid var(--line); margin-bottom: .15rem; }
