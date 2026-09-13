@@ -2,7 +2,7 @@
   position: relative;
   border-radius: .75rem;
   overflow: hidden;
-  background: #e8e8e8;
+  background: #ddd;
   aspect-ratio: 16 / 10;
 }
 .kit-photo {
@@ -13,16 +13,20 @@
   object-position: center center;
   background: #e8e8e8;
 }
+.kit-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #ececec;
+}
 .kit-pad {
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
-  background: radial-gradient(circle, rgb(255 255 255 / 0) 30%, rgb(255 220 80 / 0) 70%);
 }
 .kit-pad.hit {
   background: radial-gradient(circle, rgb(255 236 170 / .55) 0%, rgb(255 170 40 / .18) 58%, transparent 72%);
   box-shadow: 0 0 18px rgb(255 196 70 / .55);
-  transform: scale(1.06);
   animation: kitglow .18s ease-out;
 }
 @keyframes kitglow {
