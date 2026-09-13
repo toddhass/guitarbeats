@@ -45,6 +45,7 @@ function getEngine(): Engine {
   masterGain.gain.value = 1;
   masterGain.connect(ctx.destination);
   const synth = new Synth(ctx, masterGain);
+  synth.kit = "eighty";
   const seq = new Sequencer(synth, ctx);
   seq.setParts(initialSong.parts);
   seq.bpm = initialSong.bpm;
@@ -59,7 +60,7 @@ export function ensureEngine(): Engine {
 
 function ensureParts(song: Song) {
   const { seq } = getEngine();
-  seq.setParts(song.parts, true);
+  seq.setParts(song.parts, false);
   return seq;
 }
 
@@ -130,7 +131,7 @@ export const useApp = create<{
   }
 
   function beginPlayback(song: Song) {
-    const { ctx, seq, synth } = getEngine();
+    const { ctx, seq } = getEngine();
     unlockAudio(ctx);
     applyKitClick();
     seq.stop();
@@ -144,12 +145,6 @@ export const useApp = create<{
     seq.bpm = bpm;
     bindClock();
     seq.start();
-    if (!(get().conductorOn && get().countIn)) {
-      try {
-        synth.trig("kick", ctx.currentTime + 0.02, 1);
-        synth.trig("hat", ctx.currentTime + 0.02, 0.8);
-      } catch { /* */ }
-    }
     window.scrollTo({ top: 0, behavior: "smooth" });
     const tab = get().tab;
     set({
@@ -157,7 +152,7 @@ export const useApp = create<{
       bpm,
       playing: true,
       step: 0,
-      partName: (get().conductorOn && get().countIn) ? "1" : (song.parts[0]?.name ?? "Intro"),
+      partName: song.parts[0]?.name ?? "Intro",
       barInPart: 1,
       barsInPart: song.parts[0]?.bars ?? 1,
       nextName: song.parts[1]?.name ?? "",
@@ -197,7 +192,7 @@ export const useApp = create<{
     loopPart: false,
     countIn: true,
     speed: 1,
-    kit: "room",
+    kit: "eighty",
     clickOn: false,
     clickLevel: 70,
     conductorOn: true,
@@ -221,7 +216,9 @@ export const useApp = create<{
       set({ speed: v, bpm });
     },
     setKit: (k) => {
-      getEngine().synth.kit = k;
+      const { synth } = getEngine();
+      synth.kit = k;
+      void synth.samples.load(k);
       set({ kit: k });
     },
     setClickOn: (v) => {
@@ -306,6 +303,7 @@ export const useApp = create<{
         if (!list.some((s) => s.id === ready.id)) list.unshift(ready);
         const brain = brainFor(ready.id, ready.feel, ready.title);
         getEngine().synth.kit = brain.kit;
+        void getEngine().synth.samples.load(brain.kit);
         set({ library: list, tab: "play", conductorOn: true, kit: brain.kit });
         getEngine().seq.conductor = true;
         beginPlayback(ready);
@@ -374,7 +372,7 @@ export const useApp = create<{
 
     toggleStart: () => {
       const now = Date.now();
-      if (now - lastToggle < 280) return;
+      if (now - lastToggle < 220) return;
       lastToggle = now;
       const { ctx, seq } = getEngine();
       unlockAudio(ctx);
@@ -387,14 +385,10 @@ export const useApp = create<{
     },
 
     fill: () => {
-      const { seq, synth, ctx } = getEngine();
+      const { seq, ctx } = getEngine();
       unlockAudio(ctx);
       ensureParts(get().song);
       seq.queueFill();
-      try {
-        synth.trig("snare", ctx.currentTime, 0.9);
-        synth.trig("highTom", ctx.currentTime, 0.7);
-      } catch { /* */ }
     },
 
     nextPart: () => {
@@ -403,7 +397,7 @@ export const useApp = create<{
       ensureParts(get().song);
       seq.nextPart();
       set({
-        partName: "1",
+        partName: seq.currentPart?.name ?? get().song.parts[0]?.name ?? "Intro",
         step: 0,
         barInPart: 1,
         barsInPart: seq.currentPart?.bars ?? 1,
@@ -416,7 +410,7 @@ export const useApp = create<{
       ensureParts(get().song);
       seq.restart();
       set({
-        partName: "1",
+        partName: seq.currentPart?.name ?? get().song.parts[0]?.name ?? "Intro",
         step: 0,
         barInPart: 1,
         barsInPart: seq.currentPart?.bars ?? 1,
