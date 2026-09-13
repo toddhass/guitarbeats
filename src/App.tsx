@@ -3,6 +3,7 @@ import { useApp } from "./state/store";
 import { NowPlaying } from "./components/NowPlaying";
 import { Transport } from "./components/Transport";
 import { PracticePanel } from "./components/PracticePanel";
+import { DrumPanel } from "./components/DrumPanel";
 import { Library } from "./components/Library";
 import { GroovePanel } from "./components/GroovePanel";
 import { Splash } from "./components/Splash";
@@ -11,8 +12,9 @@ import { useWakeLock } from "./hooks/useWakeLock";
 import type { Tab } from "./state/tab-patch";
 
 const TABS: { id: Tab; label: string }[] = [
-    { id: "play", label: "Play" },
+  { id: "play", label: "Play" },
   { id: "practice", label: "Practice" },
+  { id: "drums", label: "Drums" },
   { id: "songs", label: "Songs" },
 ];
 
@@ -64,6 +66,12 @@ export default function App() {
         {tab === "practice" && (
           <div className="pane pane-practice">
             <PracticePanel />
+          </div>
+        )}
+
+        {tab === "drums" && (
+          <div className="pane pane-drums">
+            <DrumPanel />
             <GroovePanel />
             <Transport mode="kits" />
           </div>
@@ -75,7 +83,7 @@ export default function App() {
           </div>
         )}
 
-        <nav className="tabs tabs-3">
+        <nav className="tabs tabs-4">
           {TABS.map((t) => (
             <button
               key={t.id}
