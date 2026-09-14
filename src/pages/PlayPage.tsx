@@ -1,5 +1,6 @@
 import { useApp } from "../state/store";
 import { NowPlaying } from "../components/NowPlaying";
+import { Waveform } from "../components/Waveform";
 import { Transport } from "../components/Transport";
 
 export function PlayPage() {
@@ -16,6 +17,7 @@ export function PlayPage() {
         <span className={`live-dot${playing ? " on" : ""}`}>{playing ? "Live" : "Armed"}</span>
       </div>
       <NowPlaying />
+      <Waveform />
       <section className="card">
         <p className="kicker">Form</p>
         <div className="chips form-map">
