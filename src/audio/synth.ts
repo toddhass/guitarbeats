@@ -14,8 +14,8 @@ export class Synth {
     this.ctx = ctx;
     this.dest = dest;
     this.samples = new SampleBank(ctx);
-    void this.samples.load("eighty").then(() => this.samples.loadAll());
-    const n = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+    void this.samples.load("eighty");
+    const n = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.2), ctx.sampleRate);
     const d = n.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     this.noise = n;
@@ -65,9 +65,9 @@ export class Synth {
     n.connect(hp); hp.connect(g); g.connect(this.dest);
   }
   crash(t: number, v: number) {
-    const n = this.ns(t, 0.5);
+    const n = this.ns(t, 0.35);
     const hp = this.ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 6000;
-    const g = this.env(t, 0.28 * v, 0.4);
+    const g = this.env(t, 0.28 * v, 0.35);
     n.connect(hp); hp.connect(g); g.connect(this.dest);
   }
   tom(t: number, v: number, f: number) {
@@ -85,18 +85,11 @@ export class Synth {
     o.start(t); o.stop(t + 0.07);
   }
   countStick(t: number, v: number, downbeat: boolean) {
-    const n = this.ns(t, downbeat ? 0.05 : 0.03);
-    const bp = this.ctx.createBiquadFilter();
-    bp.type = "bandpass";
-    bp.frequency.value = downbeat ? 1050 : 1650;
-    bp.Q.value = 8;
-    const g = this.env(t, (downbeat ? 0.4 : 0.2) * v, downbeat ? 0.04 : 0.025);
-    n.connect(bp); bp.connect(g); g.connect(this.dest);
     const o = this.ctx.createOscillator();
     o.type = "triangle";
     o.frequency.setValueAtTime(downbeat ? 880 : 1320, t);
-    const og = this.env(t, (downbeat ? 0.16 : 0.08) * v, 0.03);
-    o.connect(og); og.connect(this.dest);
+    const g = this.env(t, (downbeat ? 0.28 : 0.14) * v, downbeat ? 0.04 : 0.025);
+    o.connect(g); g.connect(this.dest);
     o.start(t); o.stop(t + 0.05);
   }
   trig(voice: DrumVoice, t: number, v: number) {
