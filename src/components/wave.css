@@ -1,0 +1,8 @@
+.wave-card { padding-bottom: .65rem; }
+.wave {
+  display: block;
+  width: 100%;
+  height: 5.5rem;
+  border-radius: .5rem;
+  background: #12110e;
+}
