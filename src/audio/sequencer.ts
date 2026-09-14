@@ -68,6 +68,7 @@ export class Sequencer {
   }
 
   private emit(part: SongPart) {
+    if (this.step % 4 !== 0 && this.countInLeft <= 0) return;
     const bars = Math.max(1, part.bars || 1);
     const next = this.parts[(this.partIndex + 1) % Math.max(1, this.parts.length)];
     this.onNext?.(this.step, part, {
@@ -78,7 +79,6 @@ export class Sequencer {
   }
 
   private advance() {
-    if (this.ctx.state !== "running") void this.ctx.resume();
     const time = Math.max(this.nextStepTime, this.ctx.currentTime);
 
     if (this.countInLeft > 0) {
@@ -145,9 +145,16 @@ export class Sequencer {
   }
 
   private tick = () => {
-    if (this.playing && this.ctx.state !== "running") void this.ctx.resume();
-    while (this.playing && this.nextStepTime < this.ctx.currentTime + 0.12) this.advance();
-    if (this.playing) this.timer = window.setTimeout(this.tick, 25);
+    if (!this.playing) return;
+    if (this.nextStepTime < this.ctx.currentTime - 0.25) {
+      this.nextStepTime = this.ctx.currentTime;
+    }
+    let n = 0;
+    while (this.playing && this.nextStepTime < this.ctx.currentTime + 0.08 && n < 3) {
+      this.advance();
+      n++;
+    }
+    this.timer = window.setTimeout(this.tick, 40);
   };
 
   armCountIn() {
