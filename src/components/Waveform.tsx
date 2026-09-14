@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useApp, ensureEngine } from "../state/store";
+import "./wave.css";
 
 let tap: AnalyserNode | null = null;
 
